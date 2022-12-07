@@ -1,5 +1,5 @@
 server.port: 8989
-server.servlet.context-path: /bank-api
+server.servlet.context-path: /the-startup-bank
 
 spring.security.user.name: bankapp
 spring.security.user.password: changeit
