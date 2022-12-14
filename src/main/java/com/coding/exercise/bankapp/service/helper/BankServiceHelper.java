@@ -1,22 +1,14 @@
 package com.coding.exercise.bankapp.service.helper;
 
-import com.coding.exercise.bankapp.model.Address;
-import com.coding.exercise.bankapp.model.Contact;
-import com.coding.exercise.bankapp.model.Customer;
-import com.coding.exercise.bankapp.pojos.AddressDetails;
-import com.coding.exercise.bankapp.pojos.ContactDetails;
-import com.coding.exercise.bankapp.pojos.CustomerDetails;
+import com.coding.exercise.bankapp.model.*;
+import com.coding.exercise.bankapp.pojos.*;
 import org.springframework.stereotype.Component;
-
-import static com.coding.exercise.bankapp.TheStartupBankApplication.createID;
-
 @Component
 public class BankServiceHelper {
     public Customer convertCustomerToEntity(CustomerDetails customerDetails) {
         return Customer.builder()
                 .firstName(customerDetails.getFirstName())
                 .lastName(customerDetails.getLastName())
-                .customerNumber(createID())
                 .contactDetails(convertContactToEntity(customerDetails.getContactDetails()))
                 .address(convertAddressToEntity(customerDetails.getAddressDetails()))
                 .build();
@@ -65,6 +57,41 @@ public class BankServiceHelper {
                 .county(address.getCounty())
                 .postcode(address.getPostcode())
                 .country(address.getCountry())
+                .build();
+    }
+
+    public AccountDetails convertToAccountPojo(Account account) {
+        return AccountDetails.builder()
+                .accountType(account.getAccountType())
+                .accountId(account.getAccountNumber())
+                .customerNumber(account.getCustomerNumber())
+                .accountCreatedTime(account.getAccountCreatedTime())
+                .bankInformationDetails(convertToBankInfoPojo(account.getBankInformation()))
+                .accountBalance(account.getAccountBalance())
+                .build();
+    }
+
+    private BankInformationDetails convertToBankInfoPojo(BankInformation bankInformation) {
+        return BankInformationDetails.builder()
+                .branchName(bankInformation.getBranchName())
+                .branchAddress(convertAddressToPojo(bankInformation.getBranchAddress()))
+                .branchCode(bankInformation.getBranchCode())
+                .build();
+    }
+
+    public Account convertAccountToEntity(AccountDetails accountDetails) {
+        return Account.builder()
+                .accountType(accountDetails.getAccountType())
+                .bankInformation(convertBankInfoToEntity(accountDetails.getBankInformationDetails()))
+                .customerNumber(accountDetails.getCustomerNumber())
+                .build();
+    }
+
+    private BankInformation convertBankInfoToEntity(BankInformationDetails bankInformationDetails) {
+        return BankInformation.builder()
+                .branchName(bankInformationDetails.getBranchName())
+                .branchAddress(convertAddressToEntity(bankInformationDetails.getBranchAddress()))
+                .branchCode(bankInformationDetails.getBranchCode())
                 .build();
     }
 }

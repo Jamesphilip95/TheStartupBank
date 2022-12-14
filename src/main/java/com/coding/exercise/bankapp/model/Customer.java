@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -23,6 +24,8 @@ public class Customer {
 
     private Long customerNumber;
 
+    @OneToMany(cascade = {CascadeType.ALL})
+    private List<Account> accounts;
 
     @OneToOne(cascade=CascadeType.ALL)
     private Address address;
