@@ -18,7 +18,6 @@ public class Contact {
     @GeneratedValue
     @Column(name="CONTACT_ID")
     private UUID id;
-
     private String email;
     private String mobile;
 }

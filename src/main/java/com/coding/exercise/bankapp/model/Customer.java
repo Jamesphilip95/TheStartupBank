@@ -24,8 +24,8 @@ public class Customer {
 
     private Long customerNumber;
 
-    @OneToMany(cascade = {CascadeType.ALL})
-    private List<Account> accounts;
+    @ElementCollection
+    private List<String> accounts;
 
     @OneToOne(cascade=CascadeType.ALL)
     private Address address;

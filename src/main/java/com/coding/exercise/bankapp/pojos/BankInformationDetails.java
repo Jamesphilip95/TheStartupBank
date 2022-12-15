@@ -2,19 +2,17 @@ package com.coding.exercise.bankapp.pojos;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-@RequiredArgsConstructor
 @Getter
 @Setter
 @Builder
 public class BankInformationDetails {
 
-    private final String branchName;
+    private String branchName;
 
-    private final Integer branchCode;
+    private Integer branchCode;
 
-    private final AddressDetails branchAddress;
+    private AddressDetails branchAddress;
 
 }

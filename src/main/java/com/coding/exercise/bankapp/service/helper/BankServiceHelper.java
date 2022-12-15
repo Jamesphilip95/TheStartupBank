@@ -9,6 +9,9 @@ public class BankServiceHelper {
         return Customer.builder()
                 .firstName(customerDetails.getFirstName())
                 .lastName(customerDetails.getLastName())
+                .accounts(customerDetails.getAccounts())
+                .customerNumber(customerDetails.getCustomerNumber())
+                .createDateTime(customerDetails.getCreateDateTime())
                 .contactDetails(convertContactToEntity(customerDetails.getContactDetails()))
                 .address(convertAddressToEntity(customerDetails.getAddressDetails()))
                 .build();
@@ -36,6 +39,8 @@ public class BankServiceHelper {
         return CustomerDetails.builder()
                 .firstName(customer.getFirstName())
                 .lastName(customer.getLastName())
+                .accounts(customer.getAccounts())
+                .createDateTime(customer.getCreateDateTime())
                 .addressDetails(convertAddressToPojo(customer.getAddress()))
                 .contactDetails(convertContactToPojo(customer.getContactDetails()))
                 .customerNumber(customer.getCustomerNumber())

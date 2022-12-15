@@ -30,4 +30,9 @@ public class CustomerController implements CustomerControllerDoc {
     public ResponseEntity<Object> listCustomers() {
         return bankService.findAllCustomers();
     }
+
+    @GetMapping(value = "/{customerNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getCustomer(@PathVariable Long customerNumber) {
+        return bankService.getCustomer(customerNumber);
+    }
 }
