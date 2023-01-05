@@ -2,11 +2,13 @@ package com.coding.exercise.bankapp.service;
 
 import com.coding.exercise.bankapp.model.Account;
 import com.coding.exercise.bankapp.model.Customer;
+import com.coding.exercise.bankapp.model.Transaction;
 import com.coding.exercise.bankapp.pojos.AccountDetails;
 import com.coding.exercise.bankapp.pojos.CustomerDetails;
-import com.coding.exercise.bankapp.pojos.TransferDetails;
+import com.coding.exercise.bankapp.pojos.TransactionDetails;
 import com.coding.exercise.bankapp.respository.AccountRepository;
 import com.coding.exercise.bankapp.respository.CustomerRepository;
+import com.coding.exercise.bankapp.respository.TransactionRepository;
 import com.coding.exercise.bankapp.service.helper.BankServiceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.coding.exercise.bankapp.TheStartupBankApplication.createID;
 
@@ -28,6 +29,8 @@ public class BankServiceImpl implements BankService{
     private BankServiceHelper bankServiceHelper;
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private TransactionRepository transactionRepository;
 
 
     @Override
@@ -52,13 +55,26 @@ public class BankServiceImpl implements BankService{
     }
 
     @Override
-    public ResponseEntity<Object> findAllAccountsForCustomer(Long customerNumber) {
-        List<AccountDetails> allAccountDetails = new ArrayList<>();
-        CustomerDetails customerDetails = findByCustomerNumber(customerNumber);
-        if(customerDetails == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public ResponseEntity<Object> findAccounts(Long customerNumber) {
+        if(customerNumber!= null) {
+            return findAccountsByCustomerNumber(customerNumber);
         }
-        List<String> accounts = customerDetails.getAccounts();
+        Iterable<Account> accountList = accountRepository.findAll();
+        List<AccountDetails> allAccountDetails = new ArrayList<>();
+        accountList.forEach(account ->
+                allAccountDetails.add(bankServiceHelper.convertToAccountPojo(account))
+        );
+
+        return ResponseEntity.status(HttpStatus.OK).body(allAccountDetails);
+    }
+
+    private ResponseEntity<Object> findAccountsByCustomerNumber(Long customerNumber) {
+        List<AccountDetails> allAccountDetails = new ArrayList<>();
+        Optional<Customer> customerEntityOpt = customerRepository.findByCustomerNumber(customerNumber);
+        if(!customerEntityOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No customer with customerNumber: " + customerNumber);
+        }
+        List<String> accounts = customerEntityOpt.get().getAccounts();
         accounts.forEach( accountNumber -> allAccountDetails.add(findByAccountNumber(accountNumber)));
         return ResponseEntity.status(HttpStatus.OK).body(allAccountDetails);
     }
@@ -69,29 +85,31 @@ public class BankServiceImpl implements BankService{
         return customerEntityOpt.map(account -> bankServiceHelper.convertToAccountPojo(account)).orElse(null);
     }
 
-    public CustomerDetails findByCustomerNumber(Long customerNumber) {
-        Optional<Customer> customerEntityOpt = customerRepository.findByCustomerNumber(customerNumber);
-
-        return customerEntityOpt.map(customer -> bankServiceHelper.convertToCustomerPojo(customer)).orElse(null);
+//    public CustomerDetails findByCustomerNumber(Long customerNumber) {
+//        Optional<Customer> customerEntityOpt = customerRepository.findByCustomerNumber(customerNumber);
+//
+//        return customerEntityOpt.map(customer -> bankServiceHelper.convertToCustomerPojo(customer)).orElse(null);
+//    }
+    private void addTransactionToAccount(UUID id, Account account) {
+        if(account.getTransactions() != null) {
+            account.getTransactions().add(id.toString());
+        }
+        else {
+            List<String> transaction = new ArrayList<>();
+            transaction.add(id.toString());
+            account.setTransactions(transaction);
+        }
+        account.setAccountBalance(getAccountBalance(account.getAccountNumber()));
     }
 
-    @Override
-    public ResponseEntity<Object> depositMoney(Long customerNumber, TransferDetails transferDetails) {
-        CustomerDetails customerDetails = findByCustomerNumber(customerNumber);
-        if(customerDetails == null) { //ToDo create proper exceptions
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    private Account getAccount(List<String> accounts, String accountNumber) {
+        if(accounts.contains(accountNumber)){
+            Optional<Account> accountEntityOpt = accountRepository.findByAccountNumber(accountNumber);
+            if(accountEntityOpt.isPresent()) {
+                return accountEntityOpt.get();
+            }
         }
-        if(customerDetails.getAccounts().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No accounts for customer: " +customerNumber);
-        }
-        List<Account> accounts = getAccountForDeposit(customerDetails.getAccounts(), transferDetails.getAccountType());
-        if(accounts.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No valid " + transferDetails.getAccountType() + " account found for customerNumber " +customerNumber);
-        }
-        accounts.get(0).setAccountBalance(accounts.get(0).getAccountBalance() + transferDetails.getAmount());
-        accountRepository.save(accounts.get(0));
-        //ToDo deposit save to transactions
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return null;
     }
 
     @Override
@@ -104,49 +122,131 @@ public class BankServiceImpl implements BankService{
     }
 
     @Override
-    public ResponseEntity<Object> getAccountBalance(Long customerNumber, String accountType) {
+    public ResponseEntity<Object> getAccountBalance(Long customerNumber, String accountNumber) {
         Optional<Customer> customerEntityOpt = customerRepository.findByCustomerNumber(customerNumber);
         if(!customerEntityOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No customer with customerNumber: " + customerNumber);
         }
-        List<Account> accountsForDeposit = getAccountForDeposit(customerEntityOpt.get().getAccounts(), accountType);
-        if(accountsForDeposit.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No valid " + accountType + " account found for customerNumber " +customerNumber);
+        Account account = getAccount(customerEntityOpt.get().getAccounts(), accountNumber);
+        if(account == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No account found for customer for account number " + accountNumber);
         }
         return ResponseEntity.status(HttpStatus.OK)
-                .body(accountsForDeposit.get(0).getAccountBalance());
+                .body(getAccountBalance(accountNumber));
+    }
+
+    public Double getAccountBalance(String accountNumber) {
+        Optional<List<Transaction>> transactionsEntityOpt = transactionRepository.findByAccountNumber(accountNumber);
+        if(!transactionsEntityOpt.isPresent()) {
+            return 0.00;
+        }
+        return calculateAccountBalance(transactionsEntityOpt.get());
+//        List<Account> accountsForDeposit = getAccountForDeposit(customerEntityOpt.get().getAccounts(), accountType);
+//        if(accountsForDeposit.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No valid " + accountType + " account found for customerNumber " +customerNumber);
+//        }
+//        return ResponseEntity.status(HttpStatus.OK)
+//                .body(accountsForDeposit.get(0).getAccountBalance());
+    }
+
+    private Double calculateAccountBalance(List<Transaction> transactions) {
+        Double balance = 0.00;
+        for (Transaction transaction : transactions) {
+            switch (transaction.getType()) {
+                case DEPOSIT:
+                    balance += transaction.getAmount();
+                    break;
+                case WITHDRAW:
+                    balance -= transaction.getAmount();
+                    break;
+            }
+        }
+        return balance;
     }
 
     @Override
-    public ResponseEntity<Object> withdrawMoney(Long customerNumber, TransferDetails transferDetails) {
-        CustomerDetails customerDetails = findByCustomerNumber(customerNumber);
-        if(customerDetails == null) { //ToDo create proper exceptions
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public ResponseEntity<Object> depositMoney(Long customerNumber, TransactionDetails transactionDetails) {
+        Optional<Customer> customerEntityOpt = customerRepository.findByCustomerNumber(customerNumber);
+        if(!customerEntityOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No customer with customerNumber: " + customerNumber);
         }
-        if(customerDetails.getAccounts().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No accounts for customer: " +customerNumber);
+//        if(customerDetails.getAccounts().isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No accounts for customer: " +customerNumber);
+//        }
+//        List<Account> accounts = getAccountForDeposit(customerDetails.getAccounts(), transferDetails.getAccountNumber());
+//        if(accounts.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No valid " + transferDetails.getAccountType() + " account found for customerNumber " +customerNumber);
+//        }
+        Account account = getAccount(customerEntityOpt.get().getAccounts(), transactionDetails.getAccountNumber());
+        if(account == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No account found for customer with account number " + transactionDetails.getAccountNumber());
         }
-        List<Account> accounts = getAccountForDeposit(customerDetails.getAccounts(), transferDetails.getAccountType());
-        if(accounts.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No valid " + transferDetails.getAccountType() + " account found for customerNumber " +customerNumber);
+        Transaction deposit = bankServiceHelper.convertToDepositEntity(customerNumber, transactionDetails);
+        transactionRepository.save(deposit);
+        addTransactionToAccount(deposit.getId(), account);
+        accountRepository.save(account);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Depositing £" + transactionDetails.getAmount());
+    }
+
+
+    @Override
+    public ResponseEntity<Object> withdrawMoney(Long customerNumber, TransactionDetails transactionDetails) {
+        Optional<Customer> customerEntityOpt = customerRepository.findByCustomerNumber(customerNumber);
+        if(!customerEntityOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No customer with customerNumber: " + customerNumber);
         }
-        Account account = accounts.get(0); //toDo make stream better
-        double newBalance = account.getAccountBalance() - transferDetails.getAmount();
+//        if(customerDetails.getAccounts().isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No accounts for customer: " +customerNumber);
+//        }
+        Account account = getAccount(customerEntityOpt.get().getAccounts(), transactionDetails.getAccountNumber());
+        if(account == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No account found for customer for account number " + transactionDetails.getAccountNumber());
+        }
+        double newBalance = getAccountBalance(account.getAccountNumber()) - transactionDetails.getAmount();
         if(newBalance<0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No enough funds in account to withdraw requested amount");
         }
-        account.setAccountBalance(newBalance);
+        Transaction withdraw = bankServiceHelper.convertToWithdrawEntity(customerNumber, transactionDetails);
+        transactionRepository.save(withdraw);
+        addTransactionToAccount(withdraw.getId(), account);
         accountRepository.save(account);
-        //ToDo deposit save to transactions
-        return ResponseEntity.status(HttpStatus.CREATED).body("Expensing £" + transferDetails.getAmount());
+        return ResponseEntity.status(HttpStatus.CREATED).body("Expensing £" + transactionDetails.getAmount());
     }
 
-    private List<Account> getAccountForDeposit(List<String> accounts, String accountType) {
-       return accounts.stream()
-               .map(accountNumber -> accountRepository.findByAccountNumber(accountNumber))
-               .filter(Optional::isPresent)
-               .map(Optional::get)
-               .filter(account -> accountType.equals(account.getAccountType())).collect(Collectors.toList());
+    @Override
+    public ResponseEntity<Object> getTransactions(String accountNumber) {
+        if(accountNumber!=null) {
+            return getTransactionsByAccountNumber(accountNumber);
+        }
+        List<TransactionDetails> allTransactionDetails = new ArrayList<>();
+        Iterable<Transaction> transactionList = transactionRepository.findAll();
+
+        transactionList.forEach(transaction ->
+                allTransactionDetails.add(bankServiceHelper.convertToTransactionPojo(transaction))
+        );
+
+        return ResponseEntity.status(HttpStatus.OK).body(allTransactionDetails);
+    }
+
+    @Override
+    public ResponseEntity<Object> getTransaction(String transactionId) {
+        Optional<Transaction> transactionEntityOpt = transactionRepository.findById(transactionId);
+        if(!transactionEntityOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No transaction with transactionId: " + transactionId);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(bankServiceHelper.convertToTransactionPojo(transactionEntityOpt.get()));
+    }
+
+    public ResponseEntity<Object> getTransactionsByAccountNumber(String accountNumber) {
+        List<TransactionDetails> allTransactionDetails = new ArrayList<>();
+        Optional<List<Transaction>> transactionEntityOpt = transactionRepository.findByAccountNumber(accountNumber);
+        if(!transactionEntityOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No transactions for accountNumber: " + accountNumber);
+        }
+        transactionEntityOpt.get().forEach(transaction ->
+                allTransactionDetails.add(bankServiceHelper.convertToTransactionPojo(transaction))
+        );
+        return ResponseEntity.status(HttpStatus.OK).body(allTransactionDetails);
     }
 
     @Override
@@ -155,9 +255,9 @@ public class BankServiceImpl implements BankService{
         if(!customerEntityOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No customer with customerNumber: " + customerNumber);
         }
-        if(hasAccountAlready(accountDetails.getAccountType(), customerEntityOpt.get().getAccounts())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Customer already has " + accountDetails.getAccountType() + " account");
-        }
+//        if(hasAccountAlready(accountDetails.getAccountType(), customerEntityOpt.get().getAccounts())) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Customer already has " + accountDetails.getAccountType() + " account");
+//        }
         Account account = bankServiceHelper.convertAccountToEntity(accountDetails);
         account.setAccountBalance(0.00);
         account.setAccountCreatedTime(new Date());
@@ -169,13 +269,13 @@ public class BankServiceImpl implements BankService{
         return ResponseEntity.status(HttpStatus.CREATED).body("Account Id: " + account.getAccountNumber());
     }
 
-    private boolean hasAccountAlready(String accountType, List<String> accounts) {
-        return accounts.stream()
-                .map(accountNumber -> accountRepository.findByAccountNumber(accountNumber))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .anyMatch(account -> accountType.equals(account.getAccountType()));
-    }
+//    private boolean hasAccountAlready(String accountType, List<String> accounts) {
+//        return accounts.stream()
+//                .map(accountNumber -> accountRepository.findByAccountNumber(accountNumber))
+//                .filter(Optional::isPresent)
+//                .map(Optional::get)
+//                .anyMatch(account -> accountType.equals(account.getAccountType()));
+//    }
 
     private void addAccountToCustomerRepository(String accountNumber, Customer customer) {
         customer.getAccounts().add(accountNumber);

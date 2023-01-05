@@ -67,12 +67,12 @@ public class BankServiceHelper {
 
     public AccountDetails convertToAccountPojo(Account account) {
         return AccountDetails.builder()
-                .accountType(account.getAccountType())
-                .accountId(account.getAccountNumber())
+                .accountNumber(account.getAccountNumber())
                 .customerNumber(account.getCustomerNumber())
                 .accountCreatedTime(account.getAccountCreatedTime())
                 .bankInformationDetails(convertToBankInfoPojo(account.getBankInformation()))
                 .accountBalance(account.getAccountBalance())
+                .transactions(account.getTransactions())
                 .build();
     }
 
@@ -86,7 +86,6 @@ public class BankServiceHelper {
 
     public Account convertAccountToEntity(AccountDetails accountDetails) {
         return Account.builder()
-                .accountType(accountDetails.getAccountType())
                 .bankInformation(convertBankInfoToEntity(accountDetails.getBankInformationDetails()))
                 .customerNumber(accountDetails.getCustomerNumber())
                 .build();
@@ -97,6 +96,34 @@ public class BankServiceHelper {
                 .branchName(bankInformationDetails.getBranchName())
                 .branchAddress(convertAddressToEntity(bankInformationDetails.getBranchAddress()))
                 .branchCode(bankInformationDetails.getBranchCode())
+                .build();
+    }
+
+    public Transaction createTransactionEntity(Long customerNumber, TransactionDetails transactionDetails, TransferType transferType) {
+        return Transaction.builder()
+                .amount(transactionDetails.getAmount())
+                .accountNumber(transactionDetails.getAccountNumber())
+                .transferAccountNumber(transactionDetails.getTransferAccountNumber())
+                .type(transferType)
+                .customerNumber(customerNumber)
+                .build();
+    }
+
+    public Transaction convertToDepositEntity(Long customerNumber, TransactionDetails transactionDetails) {
+        return createTransactionEntity(customerNumber, transactionDetails, TransferType.DEPOSIT);
+    }
+
+    public Transaction convertToWithdrawEntity(Long customerNumber, TransactionDetails transactionDetails) {
+        return createTransactionEntity(customerNumber, transactionDetails, TransferType.WITHDRAW);
+    }
+
+    public TransactionDetails convertToTransactionPojo(Transaction transaction) {
+        return TransactionDetails.builder()
+                .accountNumber(transaction.getAccountNumber())
+                .customerNumber(transaction.getCustomerNumber())
+                .amount(transaction.getAmount())
+                .type(transaction.getType())
+                .transferAccountNumber(transaction.getTransferAccountNumber())
                 .build();
     }
 }

@@ -1,5 +1,6 @@
 package com.coding.exercise.bankapp.model;
 
+import com.coding.exercise.bankapp.pojos.TransferType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,13 +24,13 @@ public class Transaction {
     @Column(name="TRANSACTION_ID")
     private UUID id;
 
-    private String type; //toDo change to enum
+    private TransferType type;
 
     private Double amount;
 
     private String accountNumber;
 
-    private String customerNumber;
+    private Long customerNumber;
 
-    private String otherAccountNumber;
+    private String transferAccountNumber;
 }

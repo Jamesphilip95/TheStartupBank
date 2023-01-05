@@ -21,12 +21,12 @@ public class CustomerController implements CustomerControllerDoc {
     @Autowired
     BankService bankService;
 
-    @PostMapping (value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping (consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> register(@RequestBody @Valid CustomerDetails customerDetails) {
         return bankService.registerCustomer(customerDetails);
     }
 
-    @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> listCustomers() {
         return bankService.findAllCustomers();
     }

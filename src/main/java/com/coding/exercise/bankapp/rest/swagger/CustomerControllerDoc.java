@@ -10,7 +10,7 @@ public interface CustomerControllerDoc {
     @ApiOperation(value = "Register", notes = "Registration for new customers")
     ResponseEntity<Object> register(CustomerDetails customerDetails);
 
-    @ApiOperation(value = "List", notes = "List all customers")
+    @ApiOperation(value = "List customers", notes = "List all customers")
     ResponseEntity<Object> listCustomers();
 
     @ApiOperation(value = "Get Customer", notes = "Get customer with customerNumber")

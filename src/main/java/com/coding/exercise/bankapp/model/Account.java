@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -24,10 +25,10 @@ public class Account {
 
     private Double accountBalance;
 
+    @ElementCollection
+    private List<String> transactions;
+
     private Long customerNumber;
-
-    private String accountType; // toDo turn into Enum
-
     @OneToOne(cascade=CascadeType.ALL)
     private BankInformation bankInformation;
 
