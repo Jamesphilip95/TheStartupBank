@@ -1,37 +1,26 @@
 package com.coding.exercise.bankapp.pojos;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
-import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
 @Builder
 public class AccountDetails {
 
-    @ApiModelProperty(hidden = true)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private final String accountNumber;
-    @ApiModelProperty(hidden = true)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Double accountBalance;
-
-    @ApiModelProperty(hidden = true)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private List<String> transactions;
+    @ApiModelProperty(readOnly = true)
+    private final UUID accountNumber;
 
     @NotNull
     private final BankInformationDetails bankInformationDetails;
-    @ApiModelProperty(hidden = true)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @NotNull
     private final Long customerNumber;
 
-    @ApiModelProperty(hidden = true)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @ApiModelProperty(readOnly = true)
     private final Date accountCreatedTime;
 
 }

@@ -23,14 +23,8 @@ public class Transaction {
     @GeneratedValue
     @Column(name="TRANSACTION_ID")
     private UUID id;
-
     private TransferType type;
-
     private Double amount;
-
-    private String accountNumber;
-
-    private Long customerNumber;
-
-    private String transferAccountNumber;
+    private UUID accountNumber;
+    private UUID transferAccountNumber;
 }

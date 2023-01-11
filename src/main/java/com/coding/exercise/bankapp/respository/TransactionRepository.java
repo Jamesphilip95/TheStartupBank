@@ -6,9 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface TransactionRepository extends CrudRepository<Transaction, String> {
-    Optional<List<Transaction>> findByAccountNumber(String accountNumber);
-    Optional<Transaction> findById(String accountNumber);
+    Optional<List<Transaction>> findByAccountNumber(UUID accountNumber);
+    Optional<Transaction> findById(UUID id);
 }

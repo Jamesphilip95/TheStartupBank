@@ -1,5 +1,6 @@
 package com.coding.exercise.bankapp.pojos;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
@@ -7,21 +8,14 @@ import javax.validation.constraints.NotNull;
 @Setter
 @Builder
 public class TransactionDetails {
-//    @Valid
-//    @NotNull
-//    @ValueOfEnum(enumClass = AccountType.class, message = "Must be valid account type. DEPOSIT or SAVINGS")
-//    @JsonIgnore
-//    private final String type;
     @NotNull
     private final Double amount;
-
     @NotNull
     private final String accountNumber;
-
     private final String transferAccountNumber;
-
+    @ApiModelProperty(readOnly = true)
     private final TransferType type;
-
-    private final Long customerNumber;
+    @ApiModelProperty(readOnly = true)
+    private final String transactionID;
 
 }

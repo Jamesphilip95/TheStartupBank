@@ -2,7 +2,7 @@ package com.coding.exercise.bankapp.rest;
 
 import com.coding.exercise.bankapp.pojos.AccountDetails;
 import com.coding.exercise.bankapp.rest.swagger.AccountControllerDoc;
-import com.coding.exercise.bankapp.service.BankService;
+import com.coding.exercise.bankapp.service.AccountService;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,20 +19,29 @@ import javax.validation.Valid;
 public class AccountController implements AccountControllerDoc {
 
     @Autowired
-    BankService bankService;
+    AccountService accountService;
 
+    @Override
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> listAccounts(@RequestParam(required = false) Long customerNumber) {
-        return bankService.findAccounts(customerNumber);
+        return accountService.findAccounts(customerNumber);
     }
 
-    @GetMapping(value = "/viewBalance/{customerNumber}",produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> viewBalance(@PathVariable Long customerNumber, @RequestParam(required = true) String accountNumber) {
-        return bankService.getAccountBalance(customerNumber,accountNumber);
+    @Override
+    @GetMapping(value = "/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getAccount(@PathVariable String accountNumber) {
+        return accountService.getAccount(accountNumber);
     }
 
-    @PostMapping (value = "/{customerNumber}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> addAccount(@PathVariable Long customerNumber, @RequestBody @Valid AccountDetails accountDetails) {
-        return bankService.addAccount(accountDetails, customerNumber);
+
+//    @GetMapping(value = "/viewBalance/{accountNumber}",produces = MediaType.APPLICATION_JSON_VALUE)
+//    public Double viewBalance(@PathVariable String accountNumber) {
+//        return bankService.getAccountBalance(accountNumber);
+//    }
+
+    @Override
+    @PostMapping( consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> createAccount(@RequestBody @Valid AccountDetails accountDetails) {
+        return accountService.createAccount(accountDetails);
     }
 }

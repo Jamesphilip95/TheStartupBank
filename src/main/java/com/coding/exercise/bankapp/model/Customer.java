@@ -4,8 +4,6 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 
 @Builder
 @Data
@@ -14,19 +12,11 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Customer {
     @Id
-    @GeneratedValue
     @Column(name="CUSTOMER_ID")
-    private UUID id;
-
+    private Long customerNumber;
     private String firstName;
 
     private String lastName;
-
-    private Long customerNumber;
-
-    @ElementCollection
-    private List<String> accounts;
-
     @OneToOne(cascade=CascadeType.ALL)
     private Address address;
 
