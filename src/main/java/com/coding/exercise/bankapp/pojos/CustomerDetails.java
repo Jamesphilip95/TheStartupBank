@@ -24,6 +24,6 @@ public class CustomerDetails {
     private final Long customerNumber;
 
     @ApiModelProperty(readOnly = true)
-    private Date createDateTime;
+    private final Date createDateTime;
 
 }

@@ -1,8 +1,8 @@
 package com.coding.exercise.bankapp.rest;
 
 import com.coding.exercise.bankapp.BaseTest;
-import com.coding.exercise.bankapp.pojos.CustomerDetails;
-import com.coding.exercise.bankapp.service.CustomerService;
+import com.coding.exercise.bankapp.pojos.AccountDetails;
+import com.coding.exercise.bankapp.service.AccountService;
 import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.junit.Before;
@@ -20,17 +20,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
-public class CustomerControllerTest {
+public class AccountControllerTest {
 
 
-    public static final String CUSTOMERS_PATH = "/customers";
+    public static final String ACCOUNTS_PATH = "/accounts";
     @MockBean
-    private CustomerService customerService;
+    private AccountService accountService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -41,22 +42,30 @@ public class CustomerControllerTest {
     }
 
     @Test
-    public void registerSuccessShouldReturn200() {
-        given().body(BaseTest.buildCustomerDetailsPayload())
+    public void createAccountSuccessShouldReturn200() {
+        given().body(BaseTest.buildAccountDetailsPayload())
                 .contentType(ContentType.JSON)
-                .post(CUSTOMERS_PATH)
+                .post(ACCOUNTS_PATH)
                 .then()
                 .assertThat().statusCode(200);
     }
 
     @Test
+    public void registerShouldReturn400ForMissingPayload() {
+        given().contentType(ContentType.JSON)
+                .post(ACCOUNTS_PATH)
+                .then()
+                .assertThat().statusCode(400);
+    }
+
+    @Test
     public void listCustomersHappyPathTest() {
-        List<CustomerDetails> allCustomerDetails = new ArrayList<>();
-        allCustomerDetails.add(BaseTest.buildCustomerDetailsPayload());
-        when(customerService.findAllCustomers()).thenReturn(ResponseEntity.ok().body(allCustomerDetails));
+        List<AccountDetails> allAccountDetails = new ArrayList<>();
+        allAccountDetails.add(BaseTest.buildAccountDetailsPayload());
+        when(accountService.findAccounts(any())).thenReturn(ResponseEntity.ok().body(allAccountDetails));
 
         given().contentType(ContentType.JSON)
-                .get(CUSTOMERS_PATH)
+                .get(ACCOUNTS_PATH)
                 .then()
                 .assertThat().statusCode(200);
     }
@@ -64,39 +73,31 @@ public class CustomerControllerTest {
     @Test
     public void getCustomerHappyPathTest() {
 
-        CustomerDetails customerDetails = BaseTest.buildCustomerDetailsPayload();
-        when(customerService.getCustomer(customerDetails.getCustomerNumber())).thenReturn(ResponseEntity.ok().body(customerDetails));
+        AccountDetails accountDetails = BaseTest.buildAccountDetailsPayload();
+        when(accountService.getAccount("567e2712-cafe-4204-8449-2059435c24a0")).thenReturn(ResponseEntity.ok().body(accountDetails));
 
         given().contentType(ContentType.JSON)
-                .get(CUSTOMERS_PATH + "/12345")
+                .get(ACCOUNTS_PATH + "/567e2712-cafe-4204-8449-2059435c24a0")
                 .then()
                 .assertThat().statusCode(200);
     }
 
     @Test
     public void notFoundCustomerTest() {
-        when(customerService.getCustomer(98765L)).thenReturn(ResponseEntity.notFound().build());
+        when(accountService.getAccount(any())).thenReturn(ResponseEntity.notFound().build());
         given().contentType(ContentType.JSON)
-                .get(CUSTOMERS_PATH + "/98765")
+                .get(ACCOUNTS_PATH + "/98765")
                 .then()
                 .assertThat().statusCode(404);
     }
 
     @Test
-    public void registerShouldReturn400ForMissingPayload() {
-        given().contentType(ContentType.JSON)
-                .post(CUSTOMERS_PATH)
-                .then()
-                .assertThat().statusCode(400);
-    }
-
-    @Test
     public void registerShouldReturn400ForInvalidPayload() {
-        CustomerDetails customerDetails = BaseTest.buildCustomerDetailsPayload();
-        customerDetails.setLastName(null);
-        given().body(customerDetails)
+        AccountDetails accountDetails = BaseTest.buildAccountDetailsPayload();
+        accountDetails.setCustomerNumber(null);
+        given().body(accountDetails)
                 .contentType(ContentType.JSON)
-                .post(CUSTOMERS_PATH)
+                .post(ACCOUNTS_PATH)
                 .then()
                 .assertThat().statusCode(400);
     }

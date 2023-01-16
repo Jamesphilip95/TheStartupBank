@@ -18,15 +18,12 @@ public class Customer {
 
     private String lastName;
     @OneToOne(cascade=CascadeType.ALL)
-    private Address address;
+    private Address addressDetails;
 
     @OneToOne(cascade=CascadeType.ALL)
     private Contact contactDetails;
 
     @Temporal(TemporalType.TIME)
     private Date createDateTime;
-
-    @Temporal(TemporalType.TIME)
-    private Date updateDateTime;
 
 }

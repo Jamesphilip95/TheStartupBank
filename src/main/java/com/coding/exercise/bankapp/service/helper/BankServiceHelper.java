@@ -17,7 +17,7 @@ public class BankServiceHelper {
                 .customerNumber(customerDetails.getCustomerNumber())
                 .createDateTime(customerDetails.getCreateDateTime())
                 .contactDetails(convertContactToEntity(customerDetails.getContactDetails()))
-                .address(convertAddressToEntity(customerDetails.getAddressDetails()))
+                .addressDetails(convertAddressToEntity(customerDetails.getAddressDetails()))
                 .build();
     }
 
@@ -44,7 +44,7 @@ public class BankServiceHelper {
                 .firstName(customer.getFirstName())
                 .lastName(customer.getLastName())
                 .createDateTime(customer.getCreateDateTime())
-                .addressDetails(convertAddressToPojo(customer.getAddress()))
+                .addressDetails(convertAddressToPojo(customer.getAddressDetails()))
                 .contactDetails(convertContactToPojo(customer.getContactDetails()))
                 .customerNumber(customer.getCustomerNumber())
                 .build();
