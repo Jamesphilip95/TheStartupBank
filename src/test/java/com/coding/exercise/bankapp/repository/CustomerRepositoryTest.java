@@ -27,10 +27,11 @@ public class CustomerRepositoryTest {
     private CustomerRepository customerRepository;
 
     @Test
-    public void testSaveCustomer() {
+    public void testFindByCustomerNumber() {
         Customer customer = BaseTest.buildCustomerEntity();
         entityManager.persist(customer);
         Optional<Customer> optionalCustomer = customerRepository.findByCustomerNumber(12345L);
+        assertTrue(optionalCustomer.isPresent());
         assertEquals(customer, optionalCustomer.get());
     }
 }

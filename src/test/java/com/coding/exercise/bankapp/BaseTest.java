@@ -1,9 +1,9 @@
 package com.coding.exercise.bankapp;
 
-import com.coding.exercise.bankapp.model.Address;
-import com.coding.exercise.bankapp.model.Contact;
-import com.coding.exercise.bankapp.model.Customer;
+import com.coding.exercise.bankapp.model.*;
 import com.coding.exercise.bankapp.pojos.*;
+
+import java.util.UUID;
 
 public class BaseTest {
 
@@ -74,6 +74,38 @@ public class BaseTest {
                 .branchAddress(buildAddressDetailsPayload())
                 .branchCode(909)
                 .branchName("Test Bank")
+                .build();
+    }
+
+    public static Account buildAccountEntity() {
+        return Account.builder()
+                .customerNumber(12345L)
+                .bankInformation(buildBankInfo())
+                .accountNumber(UUID.fromString("567e2712-cafe-4204-8449-2059435c24a0"))
+                .build();
+    }
+
+    private static BankInformation buildBankInfo() {
+        return BankInformation.builder()
+                .branchAddress(buildAddressEntity())
+                .branchCode(909)
+                .branchName("Test Bank")
+                .build();
+    }
+
+    public static Account buildAccount2Entity() {
+        return Account.builder()
+                .customerNumber(12345L)
+                .bankInformation(buildBankInfo())
+                .accountNumber(UUID.fromString("967e2712-cafe-4204-8449-2059435c24a0"))
+                .build();
+    }
+
+    public static Account buildAccount3Entity() {
+        return Account.builder()
+                .customerNumber(12345L)
+                .bankInformation(buildBankInfo())
+                .accountNumber(UUID.fromString("127e2712-cafe-4204-8449-2059435c24a0"))
                 .build();
     }
 }

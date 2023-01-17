@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-public class CustomerServiceTests {
+public class CustomerServiceTest {
     @MockBean
     private CustomerRepository customerRepository;
 
@@ -96,22 +96,6 @@ public class CustomerServiceTests {
     }
 
     @Test
-    public void testCustomerNumberIncrement() {
-        CustomerDetails customerDetails = BaseTest.buildCustomerDetailsPayload();
-        Customer customer = BaseTest.buildCustomerEntity();
-        when(bankServiceHelper.convertCustomerToEntity(customerDetails)).thenReturn(customer);
-
-        customerService.registerCustomer(customerDetails);
-        assertEquals(Long.valueOf(1),customer.getCustomerNumber());
-
-        customerService.registerCustomer(customerDetails);
-        assertEquals(Long.valueOf(2),customer.getCustomerNumber());
-
-        customerService.registerCustomer(customerDetails);
-        assertEquals(Long.valueOf(3),customer.getCustomerNumber());
-    }
-
-    @Test
     public void testCreatedDateAdded() {
         CustomerDetails customerDetails = BaseTest.buildCustomerDetailsPayload();
         Customer customer = BaseTest.buildCustomerEntity();
@@ -124,5 +108,24 @@ public class CustomerServiceTests {
         assertEquals(date.getDay(), customer.getCreateDateTime().getDay()); //toDo do this better
         assertEquals(date.getMonth(), customer.getCreateDateTime().getMonth());
         assertEquals(date.getYear(), customer.getCreateDateTime().getYear());
+    }
+
+    @Test
+    public void testCustomerNumberIncrement() {
+        CustomerDetails customerDetails = BaseTest.buildCustomerDetailsPayload();
+        Customer customer = BaseTest.buildCustomerEntity();
+        when(bankServiceHelper.convertCustomerToEntity(customerDetails)).thenReturn(customer);
+
+        customerService.registerCustomer(customerDetails);
+        Long currentCustomerNumber = customer.getCustomerNumber();
+
+        customerService.registerCustomer(customerDetails);
+        assertEquals(++currentCustomerNumber,customer.getCustomerNumber());
+
+        customerService.registerCustomer(customerDetails);
+        assertEquals(++currentCustomerNumber,customer.getCustomerNumber());
+
+        customerService.registerCustomer(customerDetails);
+        assertEquals(++currentCustomerNumber,customer.getCustomerNumber());
     }
 }
