@@ -1,6 +1,7 @@
 package com.coding.exercise.bankapp.rest;
 
 import com.coding.exercise.bankapp.BaseTest;
+import com.coding.exercise.bankapp.common.ResourceNotFoundException;
 import com.coding.exercise.bankapp.pojos.AccountDetails;
 import com.coding.exercise.bankapp.service.AccountService;
 import io.restassured.http.ContentType;
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -42,12 +42,12 @@ public class AccountControllerTest {
     }
 
     @Test
-    public void createAccountSuccessShouldReturn200() {
+    public void createAccountSuccessShouldReturn201() {
         given().body(BaseTest.buildAccountDetailsPayload())
                 .contentType(ContentType.JSON)
                 .post(ACCOUNTS_PATH)
                 .then()
-                .assertThat().statusCode(200);
+                .assertThat().statusCode(201);
     }
 
     @Test
@@ -62,7 +62,7 @@ public class AccountControllerTest {
     public void listCustomersHappyPathTest() {
         List<AccountDetails> allAccountDetails = new ArrayList<>();
         allAccountDetails.add(BaseTest.buildAccountDetailsPayload());
-        when(accountService.findAccounts(any())).thenReturn(ResponseEntity.ok().body(allAccountDetails));
+        when(accountService.findAccounts(any())).thenReturn(allAccountDetails);
 
         given().contentType(ContentType.JSON)
                 .get(ACCOUNTS_PATH)
@@ -72,9 +72,8 @@ public class AccountControllerTest {
 
     @Test
     public void getCustomerHappyPathTest() {
-
         AccountDetails accountDetails = BaseTest.buildAccountDetailsPayload();
-        when(accountService.getAccount("567e2712-cafe-4204-8449-2059435c24a0")).thenReturn(ResponseEntity.ok().body(accountDetails));
+        when(accountService.getAccount("567e2712-cafe-4204-8449-2059435c24a0")).thenReturn(accountDetails);
 
         given().contentType(ContentType.JSON)
                 .get(ACCOUNTS_PATH + "/567e2712-cafe-4204-8449-2059435c24a0")
@@ -84,7 +83,7 @@ public class AccountControllerTest {
 
     @Test
     public void notFoundCustomerTest() {
-        when(accountService.getAccount(any())).thenReturn(ResponseEntity.notFound().build());
+        when(accountService.getAccount("98765")).thenThrow(ResourceNotFoundException.class);
         given().contentType(ContentType.JSON)
                 .get(ACCOUNTS_PATH + "/98765")
                 .then()

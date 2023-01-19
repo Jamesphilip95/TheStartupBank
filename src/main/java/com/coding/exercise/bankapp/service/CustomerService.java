@@ -1,12 +1,11 @@
 package com.coding.exercise.bankapp.service;
 
+import com.coding.exercise.bankapp.common.ResourceNotFoundException;
 import com.coding.exercise.bankapp.model.Customer;
 import com.coding.exercise.bankapp.pojos.CustomerDetails;
 import com.coding.exercise.bankapp.respository.CustomerRepository;
 import com.coding.exercise.bankapp.service.helper.BankServiceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,30 +24,28 @@ public class CustomerService {
     @Autowired
     private BankServiceHelper bankServiceHelper;
 
-    public ResponseEntity<Object> findAllCustomers() {
+    public List<CustomerDetails> findAllCustomers() {
         List<CustomerDetails> allCustomerDetails = new ArrayList<>();
         Iterable<Customer> customerList = customerRepository.findAll();
-
         customerList.forEach(customer ->
                 allCustomerDetails.add(bankServiceHelper.convertToCustomerPojo(customer))
         );
-
-        return ResponseEntity.status(HttpStatus.OK).body(allCustomerDetails);
+        return allCustomerDetails;
     }
 
-    public ResponseEntity<Object> registerCustomer(CustomerDetails customerDetails) {
+    public Long registerCustomer(CustomerDetails customerDetails) {
         Customer customer = bankServiceHelper.convertCustomerToEntity(customerDetails);
         customer.setCustomerNumber(createID());
         customer.setCreateDateTime(new Date());
         customerRepository.save(customer);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return customer.getCustomerNumber();
     }
 
-    public ResponseEntity<Object> getCustomer(Long customerNumber) {
+    public CustomerDetails getCustomer(Long customerNumber) {
         Optional<Customer> customerEntityOpt = customerRepository.findByCustomerNumber(customerNumber);
-        return customerEntityOpt.<ResponseEntity<Object>>map(customer ->
-                ResponseEntity.status(HttpStatus.OK).body(bankServiceHelper.convertToCustomerPojo(customer)))
-                .orElseGet(() ->
-                        ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        if(!customerEntityOpt.isPresent()){
+            throw new ResourceNotFoundException("No customer with customerNumber: " + customerNumber);
+        }
+        return bankServiceHelper.convertToCustomerPojo(customerEntityOpt.get());
     }
 }

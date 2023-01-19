@@ -6,11 +6,13 @@ import com.coding.exercise.bankapp.service.AccountService;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,25 +25,19 @@ public class AccountController implements AccountControllerDoc {
 
     @Override
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> listAccounts(@RequestParam(required = false) Long customerNumber) {
+    public List<AccountDetails> listAccounts(@RequestParam(required = false) Long customerNumber) {
         return accountService.findAccounts(customerNumber);
     }
 
     @Override
     @GetMapping(value = "/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> getAccount(@PathVariable String accountNumber) {
+    public AccountDetails getAccount(@PathVariable String accountNumber) {
         return accountService.getAccount(accountNumber);
     }
-
-
-//    @GetMapping(value = "/viewBalance/{accountNumber}",produces = MediaType.APPLICATION_JSON_VALUE)
-//    public Double viewBalance(@PathVariable String accountNumber) {
-//        return bankService.getAccountBalance(accountNumber);
-//    }
 
     @Override
     @PostMapping( consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> createAccount(@RequestBody @Valid AccountDetails accountDetails) {
-        return accountService.createAccount(accountDetails);
+        return ResponseEntity.status(HttpStatus.CREATED).body(accountService.createAccount(accountDetails));
     }
 }

@@ -12,9 +12,9 @@ public class TransactionDetails {
     private final Double amount;
     @NotNull
     private final String accountNumber;
-    private final String transferAccountNumber;
-    @ApiModelProperty(readOnly = true)
-    private final TransferType type;
+//    private final String transferAccountNumber;
+//    @ApiModelProperty(readOnly = true)
+//    private final TransferType type;
     @ApiModelProperty(readOnly = true)
     private final String transactionID;
 

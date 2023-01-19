@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.validation.Valid;
+import java.util.List;
 
 public interface AccountControllerDoc {
 
@@ -16,12 +17,10 @@ public interface AccountControllerDoc {
             @RequestBody @Valid @ApiParam AccountDetails accountDetails );
 
     @ApiOperation(value = "List accounts", notes = "List accounts")
-    ResponseEntity<Object> listAccounts(Long customerNumber);
+    List<AccountDetails> listAccounts(Long customerNumber);
 
     @ApiOperation(value = "Get account", notes = "Get account")
-    ResponseEntity<Object> getAccount(
+    AccountDetails getAccount(
             @PathVariable String accountNumber);
-
-
 
 }

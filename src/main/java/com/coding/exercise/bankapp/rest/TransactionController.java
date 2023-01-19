@@ -6,9 +6,13 @@ import com.coding.exercise.bankapp.service.TransactionService;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,24 +25,20 @@ public class TransactionController implements TransactionControllerDoc {
 
     @Override
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> createTransaction(@RequestBody TransactionDetails transactionDetails) {
-        return bankService.createTransaction(transactionDetails);
+    public ResponseEntity<UUID> createTransaction(@RequestBody TransactionDetails transactionDetails) {
+        UUID transactionId = bankService.createTransaction(transactionDetails);
+        return ResponseEntity.status(HttpStatus.CREATED).body(transactionId);
     }
-
-//    @PostMapping(value = "/withdraw/{customerNumber}",consumes = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<Object> withdrawMoney(@PathVariable Long customerNumber, @RequestBody TransactionDetails withdrawDetails) {
-//        return bankService.withdrawMoney(customerNumber, withdrawDetails);
-//    }
 
     @Override
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> listTransactions(@RequestParam (required = false) String accountNumber) {
+    public List<TransactionDetails> listTransactions(@RequestParam (required = false) String accountNumber) {
         return bankService.getTransactions(accountNumber);
     }
 
     @Override
     @GetMapping(value = "/{transactionId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> getTransaction(@PathVariable String transactionId) {
+    public TransactionDetails getTransaction(@PathVariable String transactionId) {
         return bankService.getTransaction(transactionId);
     }
 }

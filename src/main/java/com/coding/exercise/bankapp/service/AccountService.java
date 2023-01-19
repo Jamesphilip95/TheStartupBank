@@ -1,5 +1,7 @@
 package com.coding.exercise.bankapp.service;
 
+import com.coding.exercise.bankapp.common.BadRequestException;
+import com.coding.exercise.bankapp.common.ResourceNotFoundException;
 import com.coding.exercise.bankapp.model.Account;
 import com.coding.exercise.bankapp.model.Customer;
 import com.coding.exercise.bankapp.pojos.AccountDetails;
@@ -7,8 +9,6 @@ import com.coding.exercise.bankapp.respository.AccountRepository;
 import com.coding.exercise.bankapp.respository.CustomerRepository;
 import com.coding.exercise.bankapp.service.helper.BankServiceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -24,7 +24,7 @@ public class AccountService {
     @Autowired
     private CustomerRepository customerRepository;
 
-    public ResponseEntity<Object> findAccounts(Long customerNumber) {
+    public List<AccountDetails> findAccounts(Long customerNumber) {
         if(customerNumber!= null) {
             return findAccountsByCustomerNumber(customerNumber);
         }
@@ -33,37 +33,36 @@ public class AccountService {
         accountList.forEach(account ->
                 allAccountDetails.add(bankServiceHelper.convertToAccountPojo(account))
         );
-        return ResponseEntity.status(HttpStatus.OK).body(allAccountDetails);
+        return allAccountDetails;
     }
 
-    private ResponseEntity<Object> findAccountsByCustomerNumber(Long customerNumber) {
+    private List<AccountDetails> findAccountsByCustomerNumber(Long customerNumber) {
         Optional<List<Account>> accountListEntityOpt = accountRepository.findByCustomerNumber(customerNumber);
         List<AccountDetails> allAccountDetails = new ArrayList<>();
         accountListEntityOpt.ifPresent(accounts -> accounts.forEach(account ->
                 allAccountDetails.add(bankServiceHelper.convertToAccountPojo(account))
         ));
-        return ResponseEntity.status(HttpStatus.OK).body(allAccountDetails);
+        return allAccountDetails;
     }
-    public ResponseEntity<Object> createAccount(AccountDetails accountDetails) {
+    public UUID createAccount(AccountDetails accountDetails) {
         Optional<Customer> customerEntityOpt = customerRepository.findByCustomerNumber(accountDetails.getCustomerNumber());
         if(!customerEntityOpt.isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No customer with customerNumber: " + accountDetails.getCustomerNumber());
+            throw new BadRequestException("No customer with customerNumber: " + accountDetails.getCustomerNumber());
         }
         Account account = bankServiceHelper.convertAccountToEntity(accountDetails);
         account.setAccountCreatedTime(new Date());
         account.setAccountNumber(UUID.randomUUID());
         account.setCustomerNumber(account.getCustomerNumber());
         accountRepository.save(account);
-        //toDo add logging
-        return ResponseEntity.status(HttpStatus.CREATED).body(account.getAccountNumber());
+        return account.getAccountNumber();
     }
 
-    public ResponseEntity<Object> getAccount(String accountNumber) {
+    public AccountDetails getAccount(String accountNumber) {
         Optional<Account> accountEntityOpt = accountRepository.findByAccountNumber(UUID.fromString(accountNumber));
-        return accountEntityOpt
-                .<ResponseEntity<Object>>map(
-                        account -> ResponseEntity.status(HttpStatus.OK).body(bankServiceHelper.convertToAccountPojo(account)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        if(!accountEntityOpt.isPresent()){
+            throw new ResourceNotFoundException("No account with accountNumber: " + accountNumber);
+        }
+        return bankServiceHelper.convertToAccountPojo(accountEntityOpt.get());
     }
 
 }

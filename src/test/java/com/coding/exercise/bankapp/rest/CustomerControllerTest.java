@@ -1,6 +1,7 @@
 package com.coding.exercise.bankapp.rest;
 
 import com.coding.exercise.bankapp.BaseTest;
+import com.coding.exercise.bankapp.common.ResourceNotFoundException;
 import com.coding.exercise.bankapp.pojos.CustomerDetails;
 import com.coding.exercise.bankapp.service.CustomerService;
 import io.restassured.http.ContentType;
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -41,19 +41,19 @@ public class CustomerControllerTest {
     }
 
     @Test
-    public void registerSuccessShouldReturn200() {
+    public void registerSuccessShouldReturn201() {
         given().body(BaseTest.buildCustomerDetailsPayload())
                 .contentType(ContentType.JSON)
                 .post(CUSTOMERS_PATH)
                 .then()
-                .assertThat().statusCode(200);
+                .assertThat().statusCode(201);
     }
 
     @Test
     public void listCustomersHappyPathTest() {
         List<CustomerDetails> allCustomerDetails = new ArrayList<>();
         allCustomerDetails.add(BaseTest.buildCustomerDetailsPayload());
-        when(customerService.findAllCustomers()).thenReturn(ResponseEntity.ok().body(allCustomerDetails));
+        when(customerService.findAllCustomers()).thenReturn(allCustomerDetails);
 
         given().contentType(ContentType.JSON)
                 .get(CUSTOMERS_PATH)
@@ -65,7 +65,7 @@ public class CustomerControllerTest {
     public void getCustomerHappyPathTest() {
 
         CustomerDetails customerDetails = BaseTest.buildCustomerDetailsPayload();
-        when(customerService.getCustomer(customerDetails.getCustomerNumber())).thenReturn(ResponseEntity.ok().body(customerDetails));
+        when(customerService.getCustomer(customerDetails.getCustomerNumber())).thenReturn(customerDetails);
 
         given().contentType(ContentType.JSON)
                 .get(CUSTOMERS_PATH + "/12345")
@@ -75,7 +75,7 @@ public class CustomerControllerTest {
 
     @Test
     public void notFoundCustomerTest() {
-        when(customerService.getCustomer(98765L)).thenReturn(ResponseEntity.notFound().build());
+        when(customerService.getCustomer(98765L)).thenThrow(ResourceNotFoundException.class);
         given().contentType(ContentType.JSON)
                 .get(CUSTOMERS_PATH + "/98765")
                 .then()
