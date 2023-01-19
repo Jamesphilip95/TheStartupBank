@@ -2,18 +2,21 @@ package com.coding.exercise.bankapp.service;
 
 
 import com.coding.exercise.bankapp.BaseTest;
+import com.coding.exercise.bankapp.common.BadRequestException;
+import com.coding.exercise.bankapp.common.ResourceNotFoundException;
 import com.coding.exercise.bankapp.model.Account;
 import com.coding.exercise.bankapp.model.Customer;
 import com.coding.exercise.bankapp.pojos.AccountDetails;
 import com.coding.exercise.bankapp.respository.AccountRepository;
 import com.coding.exercise.bankapp.respository.CustomerRepository;
 import com.coding.exercise.bankapp.service.helper.BankServiceHelper;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.*;
@@ -29,6 +32,8 @@ public class AccountServiceTest {
     @MockBean
     private AccountRepository accountRepository;
 
+    @Rule
+    public ExpectedException exceptionRule = ExpectedException.none();
     @MockBean
     private CustomerRepository customerRepository;
 
@@ -36,6 +41,7 @@ public class AccountServiceTest {
     private BankServiceHelper bankServiceHelper;
     @Autowired
     private AccountService accountService;
+
 
     @Test
     public void testCreateAccountHappyPath() {
@@ -46,7 +52,7 @@ public class AccountServiceTest {
         when(bankServiceHelper.convertAccountToEntity(accountDetails)).thenReturn(account);
         Date date = new Date();
 
-        ResponseEntity<Object> objectResponseEntity = accountService.createAccount(accountDetails);
+        UUID accountNumber = accountService.createAccount(accountDetails);
 
         assertEquals(date.getDay(), account.getAccountCreatedTime().getDay()); //toDo do this better
         assertEquals(date.getMonth(), account.getAccountCreatedTime().getMonth());
@@ -54,33 +60,29 @@ public class AccountServiceTest {
 
         assertEquals(Long.valueOf(12345), account.getCustomerNumber());
 
-        assertNotNull(account.getAccountNumber());
-
         verify(accountRepository).save(account);
 
-        assertEquals(201, objectResponseEntity.getStatusCodeValue());
+        assertNotNull(accountNumber);
     }
 
-    @Test
+    @Test(expected = BadRequestException.class)
     public void testCreateAccountNotFound() {
         Optional<Customer> customerEntityOpt = Optional.empty();
         when(customerRepository.findByCustomerNumber(12345L)).thenReturn(customerEntityOpt);
-
-        ResponseEntity<Object> objectResponseEntity = accountService.createAccount(BaseTest.buildAccountDetailsPayload());
-
-
-        assertEquals(400, objectResponseEntity.getStatusCodeValue());
+        accountService.createAccount(BaseTest.buildAccountDetailsPayload());
+        exceptionRule.expect(BadRequestException.class);
+        String expectedMessage = "No customer with customerNumber: 12345";
+        exceptionRule.expectMessage(expectedMessage);
     }
 
     @Test
     public void testGetAccount() {
         Optional<Account> accountEntityOpt = Optional.of(BaseTest.buildAccountEntity());
         when(accountRepository.findByAccountNumber(UUID.fromString("567e2712-cafe-4204-8449-2059435c24a0"))).thenReturn(accountEntityOpt);
-        when(bankServiceHelper.convertToAccountPojo(any())).thenReturn(BaseTest.buildAccountDetailsPayload());
+        AccountDetails accountDetails = BaseTest.buildAccountDetailsPayload();
+        when(bankServiceHelper.convertToAccountPojo(any())).thenReturn(accountDetails);
 
-        ResponseEntity<Object> accountResponseEntity = accountService.getAccount("567e2712-cafe-4204-8449-2059435c24a0");
-        assertTrue(accountResponseEntity.getBody() instanceof AccountDetails);
-        assertEquals(200, accountResponseEntity.getStatusCodeValue());
+        assertEquals(accountDetails,accountService.getAccount("567e2712-cafe-4204-8449-2059435c24a0"));
     }
 
     @Test
@@ -91,11 +93,9 @@ public class AccountServiceTest {
         when(accountRepository.findAll()).thenReturn(accountList);
         when(bankServiceHelper.convertToAccountPojo(any())).thenReturn(BaseTest.buildAccountDetailsPayload());
 
-        ResponseEntity<Object> accountsResponseEntity = accountService.findAccounts(null);
-        assertTrue(accountsResponseEntity.getBody() instanceof List<?>);
-        List<AccountDetails> body = (List<AccountDetails>) accountsResponseEntity.getBody();
-        assertEquals(2, body.size() );
-        assertEquals(200, accountsResponseEntity.getStatusCodeValue());
+        List<AccountDetails> accountDetails = accountService.findAccounts(null);
+        assertNotNull(accountDetails);
+        assertEquals(2, accountDetails.size());
     }
 
     @Test
@@ -112,33 +112,28 @@ public class AccountServiceTest {
         when(accountRepository.findByCustomerNumber(12345L)).thenReturn(accountListEntityOpt);
         when(bankServiceHelper.convertToAccountPojo(any())).thenReturn(BaseTest.buildAccountDetailsPayload());
 
-        ResponseEntity<Object> accountsResponseEntity = accountService.findAccounts(12345L);
-        assertTrue(accountsResponseEntity.getBody() instanceof List<?>);
-        List<AccountDetails> body = (List<AccountDetails>) accountsResponseEntity.getBody();
-        assertEquals(2, body.size() );
-        assertEquals(200, accountsResponseEntity.getStatusCodeValue());
-    }
+        List<AccountDetails> accounts = accountService.findAccounts(12345L);
+        assertNotNull(accounts);
+        assertEquals(2, accounts.size());
 
+    }
     @Test
     public void testFindAllCustomersWhenEmptyRepository() {
-        List<Account> accountList = new ArrayList<>();
-        when(accountRepository.findAll()).thenReturn(accountList);
+        when(accountRepository.findAll()).thenReturn(new ArrayList<>());
         when(bankServiceHelper.convertToAccountPojo(any())).thenReturn(BaseTest.buildAccountDetailsPayload());
 
-        ResponseEntity<Object> accountsResponseEntity = accountService.findAccounts(null);
-        assertTrue(accountsResponseEntity.getBody() instanceof List<?>);
-        List<AccountDetails> body = (List<AccountDetails>) accountsResponseEntity.getBody();
-        assertEquals(0, body.size() );
-        assertEquals(200, accountsResponseEntity.getStatusCodeValue());
+        List<AccountDetails> accountDetails = accountService.findAccounts(null);
+        assertNotNull(accountDetails);
+        assertTrue(accountDetails.isEmpty());
     }
-    @Test
+    @Test(expected = ResourceNotFoundException.class)
     public void testGetAccountNotFound() {
         Optional<Account> accountEntityOpt = Optional.empty();
         when(accountRepository.findByAccountNumber(UUID.fromString("567e2712-cafe-4204-8449-2059435c24a0"))).thenReturn(accountEntityOpt);
-        when(bankServiceHelper.convertToAccountPojo(any())).thenReturn(BaseTest.buildAccountDetailsPayload());
+        accountService.getAccount("567e2712-cafe-4204-8449-2059435c24a0");
 
-        ResponseEntity<Object> accountResponseEntity = accountService.getAccount("567e2712-cafe-4204-8449-2059435c24a0");
-        assertEquals(404, accountResponseEntity.getStatusCodeValue());
+        String expectedMessage = "No account with accountNumber: 567e2712-cafe-4204-8449-2059435c24a0";
+        exceptionRule.expectMessage(expectedMessage);
     }
 
 }

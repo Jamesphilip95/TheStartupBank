@@ -1,5 +1,7 @@
 package com.coding.exercise.bankapp.service;
 
+import com.coding.exercise.bankapp.common.BadRequestException;
+import com.coding.exercise.bankapp.common.ResourceNotFoundException;
 import com.coding.exercise.bankapp.model.Account;
 import com.coding.exercise.bankapp.model.Transaction;
 import com.coding.exercise.bankapp.pojos.TransactionDetails;
@@ -7,8 +9,6 @@ import com.coding.exercise.bankapp.respository.AccountRepository;
 import com.coding.exercise.bankapp.respository.TransactionRepository;
 import com.coding.exercise.bankapp.service.helper.BankServiceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -22,46 +22,46 @@ public class TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
 
-    public ResponseEntity<Object> createTransaction(TransactionDetails transactionDetails) {
+    public UUID createTransaction(TransactionDetails transactionDetails) {
         Optional<Account> accountEntityOpt = accountRepository.findByAccountNumber(UUID.fromString(transactionDetails.getAccountNumber()));
         if(!accountEntityOpt.isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No account with accountNumber: " + transactionDetails.getAccountNumber()); //toDo change to exception
+            throw new BadRequestException("No account with accountNumber: " + transactionDetails.getAccountNumber()); //toDo change to exception
         }
-        List<Transaction> transactions = bankServiceHelper.convertToTransactionEntities(transactionDetails);
-        transactionRepository.saveAll(transactions);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        Transaction transaction = bankServiceHelper.convertToTransactionEntity(transactionDetails);
+        transactionRepository.save(transaction);
+        return transaction.getId();
     }
 
-    public ResponseEntity<Object> getTransactions(String accountNumber) {
+    public List<TransactionDetails> getTransactions(String accountNumber) {
         if(accountNumber!=null) {
             return getTransactionsByAccountNumber(accountNumber);
         }
         List<TransactionDetails> allTransactionDetails = new ArrayList<>();
         Iterable<Transaction> transactionList = transactionRepository.findAll();
-
         transactionList.forEach(transaction ->
                 allTransactionDetails.add(bankServiceHelper.convertToTransactionPojo(transaction))
         );
-
-        return ResponseEntity.status(HttpStatus.OK).body(allTransactionDetails);
+        return allTransactionDetails;
     }
 
-    public ResponseEntity<Object> getTransaction(String transactionId) {
+    public TransactionDetails getTransaction(String transactionId) {
         Optional<Transaction> transactionEntityOpt = transactionRepository.findById(UUID.fromString(transactionId));
-        return transactionEntityOpt.<ResponseEntity<Object>>map(transaction -> ResponseEntity.status(HttpStatus.OK).body(bankServiceHelper.convertToTransactionPojo(transaction)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        if(!transactionEntityOpt.isPresent()) {
+            throw new ResourceNotFoundException("No transaction with transaction id " + transactionId);
+        }
+        return bankServiceHelper.convertToTransactionPojo(transactionEntityOpt.get());
     }
 
-    public ResponseEntity<Object> getTransactionsByAccountNumber(String accountNumber) {
+    public List<TransactionDetails> getTransactionsByAccountNumber(String accountNumber) {
         List<TransactionDetails> allTransactionDetails = new ArrayList<>();
         Optional<List<Transaction>> transactionEntityOpt = transactionRepository.findByAccountNumber(UUID.fromString(accountNumber));
         if(!transactionEntityOpt.isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No transactions for accountNumber: " + accountNumber);
+            throw new BadRequestException("No transaction with account number " + accountNumber);
         }
         transactionEntityOpt.get().forEach(transaction ->
                 allTransactionDetails.add(bankServiceHelper.convertToTransactionPojo(transaction))
         );
-        return ResponseEntity.status(HttpStatus.OK).body(allTransactionDetails);
+        return allTransactionDetails;
     }
 
 //    private boolean hasAccountAlready(String accountType, List<String> accounts) {
