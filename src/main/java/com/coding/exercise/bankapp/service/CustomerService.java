@@ -13,7 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static com.coding.exercise.bankapp.TheStartupBankApplication.createID;
+import static com.coding.exercise.bankapp.TheStartupBankApplication.createCustomerNumber;
 
 @Service
 public class CustomerService {
@@ -21,21 +21,19 @@ public class CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
 
-    @Autowired
-    private BankServiceHelper bankServiceHelper;
 
     public List<CustomerDetails> findAllCustomers() {
         List<CustomerDetails> allCustomerDetails = new ArrayList<>();
         Iterable<Customer> customerList = customerRepository.findAll();
         customerList.forEach(customer ->
-                allCustomerDetails.add(bankServiceHelper.convertToCustomerPojo(customer))
+                allCustomerDetails.add(BankServiceHelper.convertToCustomerPojo(customer))
         );
         return allCustomerDetails;
     }
 
     public Long registerCustomer(CustomerDetails customerDetails) {
-        Customer customer = bankServiceHelper.convertCustomerToEntity(customerDetails);
-        customer.setCustomerNumber(createID());
+        Customer customer = BankServiceHelper.convertCustomerToEntity(customerDetails);
+        customer.setCustomerNumber(createCustomerNumber());
         customer.setCreateDateTime(new Date());
         customerRepository.save(customer);
         return customer.getCustomerNumber();
@@ -46,6 +44,6 @@ public class CustomerService {
         if(!customerEntityOpt.isPresent()){
             throw new ResourceNotFoundException("No customer with customerNumber: " + customerNumber);
         }
-        return bankServiceHelper.convertToCustomerPojo(customerEntityOpt.get());
+        return BankServiceHelper.convertToCustomerPojo(customerEntityOpt.get());
     }
 }

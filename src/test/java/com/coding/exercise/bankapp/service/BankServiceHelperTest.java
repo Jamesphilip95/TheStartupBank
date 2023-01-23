@@ -5,7 +5,6 @@ import com.coding.exercise.bankapp.model.Customer;
 import com.coding.exercise.bankapp.service.helper.BankServiceHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -15,12 +14,9 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringRunner.class)
 public class BankServiceHelperTest {
 
-    @Autowired
-    private BankServiceHelper bankServiceHelper;
-
     @Test
     public void testConvertCustomerToEntity() {
-        Customer customer = bankServiceHelper.convertCustomerToEntity(BaseTest.buildCustomerDetailsPayload());
+        Customer customer = BankServiceHelper.convertCustomerToEntity(BaseTest.buildCustomerDetailsPayload());
         assertEquals("Joe",customer.getFirstName());
         assertEquals("Bloggs",customer.getLastName());
         assertEquals(Long.valueOf(12345),customer.getCustomerNumber());

@@ -11,6 +11,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -18,13 +20,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static com.coding.exercise.bankapp.TheStartupBankApplication.createID;
+import static com.coding.exercise.bankapp.TheStartupBankApplication.createCustomerNumber;
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,9 +33,8 @@ import static org.mockito.Mockito.when;
 public class CustomerServiceTest {
     @MockBean
     private CustomerRepository customerRepository;
-
-    @MockBean
-    private BankServiceHelper bankServiceHelper;
+    @Captor
+    ArgumentCaptor<Customer> customerCaptor;
     @Autowired
     private CustomerService customerService;
 
@@ -45,51 +44,64 @@ public class CustomerServiceTest {
     @Test
     public void testRegisterHappyPath() {
         CustomerDetails customerDetails = BaseTest.buildCustomerDetailsPayload();
-        Customer customer = BaseTest.buildCustomerEntity();
-        when(bankServiceHelper.convertCustomerToEntity(customerDetails)).thenReturn(customer);
-        Date date = new Date();
-
-        Long currentId = createID();
-
         Long customerNumber = customerService.registerCustomer(customerDetails);
 
-        verify(customerRepository).save(customer);
+        verify(customerRepository).save(customerCaptor.capture());
 
-        assertEquals(date.getDay(), customer.getCreateDateTime().getDay()); //toDo do this better
-        assertEquals(date.getMonth(), customer.getCreateDateTime().getMonth());
-        assertEquals(date.getYear(), customer.getCreateDateTime().getYear());
+        Customer actualCustomer = customerCaptor.getValue();
+        Customer customer = BankServiceHelper.convertCustomerToEntity(customerDetails);
+        customer.setCustomerNumber(actualCustomer.getCustomerNumber());
+        customer.setCreateDateTime(actualCustomer.getCreateDateTime());
 
-        assertEquals(++currentId,customerNumber);
+        assertEquals(customer, actualCustomer);
+        assertEquals(customerNumber, actualCustomer.getCustomerNumber());
     }
 
     @Test
     public void testGetCustomer() {
-        Optional<Customer> customerEntityOpt = Optional.of(BaseTest.buildCustomerEntity());
+        Customer customer = BaseTest.buildCustomerEntity();
+        Optional<Customer> customerEntityOpt = Optional.of(customer);
         when(customerRepository.findByCustomerNumber(12345L)).thenReturn(customerEntityOpt);
-        CustomerDetails customerDetails = BaseTest.buildCustomerDetailsPayload();
-        when(bankServiceHelper.convertToCustomerPojo(any())).thenReturn(customerDetails);
+        CustomerDetails customerDetails = BankServiceHelper.convertToCustomerPojo(customerEntityOpt.get());
 
-        assertEquals(customerDetails, customerService.getCustomer(12345L));
+        CustomerDetails actualCustomerDetails = customerService.getCustomer(12345L);
+        assertEquals(customerDetails.getCustomerNumber(),actualCustomerDetails.getCustomerNumber());
+        assertEquals(customerDetails.getLastName(),actualCustomerDetails.getLastName());
+        assertEquals(customerDetails.getFirstName(),actualCustomerDetails.getFirstName());
+        assertEquals(customerDetails.getCreateDateTime(),actualCustomerDetails.getCreateDateTime());
+        assertEquals(customerDetails.getAddressDetails().getAddressLine1(),actualCustomerDetails.getAddressDetails().getAddressLine1());
+        assertEquals(customerDetails.getAddressDetails().getAddressLine2(),actualCustomerDetails.getAddressDetails().getAddressLine2());
+        assertEquals(customerDetails.getAddressDetails().getPostcode(),actualCustomerDetails.getAddressDetails().getPostcode());
+        assertEquals(customerDetails.getAddressDetails().getPostcode(),actualCustomerDetails.getAddressDetails().getPostcode());
+        assertEquals(customerDetails.getAddressDetails().getCity(),actualCustomerDetails.getAddressDetails().getCity());
+        assertEquals(customerDetails.getAddressDetails().getCountry(),actualCustomerDetails.getAddressDetails().getCountry());
+        assertEquals(customerDetails.getAddressDetails().getCounty(),actualCustomerDetails.getAddressDetails().getCounty());
+        assertEquals(customerDetails.getContactDetails().getEmail(),actualCustomerDetails.getContactDetails().getEmail());
+        assertEquals(customerDetails.getContactDetails().getMobile(),actualCustomerDetails.getContactDetails().getMobile());
+
     }
 
     @Test
     public void testFindAllCustomers() {
         List<Customer> customerList = new ArrayList<>();
+        List<CustomerDetails> allCustomerDetails = new ArrayList<>();
+
         customerList.add(BaseTest.buildCustomerEntity());
         customerList.add(BaseTest.buildCustomerEntity());
         when(customerRepository.findAll()).thenReturn(customerList);
-        when(bankServiceHelper.convertToCustomerPojo(any())).thenReturn(BaseTest.buildCustomerDetailsPayload());
 
-        List<CustomerDetails> allCustomers = customerService.findAllCustomers();
-        assertNotNull(allCustomers);
-        assertEquals(2, allCustomers.size());
+        customerList.forEach(customer ->
+                allCustomerDetails.add(BankServiceHelper.convertToCustomerPojo(customer))
+        );
+        List<CustomerDetails> actualAllCustomerDetails = customerService.findAllCustomers();
+        assertNotNull(actualAllCustomerDetails);
+        assertEquals(allCustomerDetails.size(), actualAllCustomerDetails.size());
+        assertEquals(allCustomerDetails.get(0).getCustomerNumber(), actualAllCustomerDetails.get(0).getCustomerNumber());
     }
 
     @Test
     public void testFindAllCustomersWhenEmptyRepository() {
         when(customerRepository.findAll()).thenReturn(new ArrayList<>());
-        when(bankServiceHelper.convertToCustomerPojo(any())).thenReturn(BaseTest.buildCustomerDetailsPayload());
-
         List<CustomerDetails> allCustomers = customerService.findAllCustomers();
         assertNotNull(allCustomers);
         assertTrue(allCustomers.isEmpty());
@@ -105,19 +117,16 @@ public class CustomerServiceTest {
     @Test
     public void testCustomerNumberIncrement() {
         CustomerDetails customerDetails = BaseTest.buildCustomerDetailsPayload();
-        Customer customer = BaseTest.buildCustomerEntity();
-        when(bankServiceHelper.convertCustomerToEntity(customerDetails)).thenReturn(customer);
 
-        customerService.registerCustomer(customerDetails);
-        Long currentCustomerNumber = customer.getCustomerNumber();
+        Long currentCustomerNumber = createCustomerNumber();
 
-        customerService.registerCustomer(customerDetails);
-        assertEquals(++currentCustomerNumber,customer.getCustomerNumber());
+        Long actualCustomerNumber = customerService.registerCustomer(customerDetails);
+        assertEquals(++currentCustomerNumber,actualCustomerNumber);
 
-        customerService.registerCustomer(customerDetails);
-        assertEquals(++currentCustomerNumber,customer.getCustomerNumber());
+        actualCustomerNumber = customerService.registerCustomer(customerDetails);
+        assertEquals(++currentCustomerNumber,actualCustomerNumber);
 
-        customerService.registerCustomer(customerDetails);
-        assertEquals(++currentCustomerNumber,customer.getCustomerNumber());
+        actualCustomerNumber = customerService.registerCustomer(customerDetails);
+        assertEquals(++currentCustomerNumber,actualCustomerNumber);
     }
 }

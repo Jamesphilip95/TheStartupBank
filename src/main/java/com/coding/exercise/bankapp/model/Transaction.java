@@ -1,6 +1,5 @@
 package com.coding.exercise.bankapp.model;
 
-import com.coding.exercise.bankapp.pojos.TransferType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,8 +22,6 @@ public class Transaction {
     @GeneratedValue
     @Column(name="TRANSACTION_ID")
     private UUID id;
-    private TransferType type;
     private Double amount;
     private UUID accountNumber;
-    private UUID transferAccountNumber;
 }

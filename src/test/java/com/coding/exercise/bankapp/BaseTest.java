@@ -108,4 +108,39 @@ public class BaseTest {
                 .accountNumber(UUID.fromString("127e2712-cafe-4204-8449-2059435c24a0"))
                 .build();
     }
+
+    public static TransactionDetails buildTransactionDetailsPayload() {
+        return TransactionDetails.builder()
+                .amount(40.50)
+                .accountNumber("567e2712-cafe-4204-8449-2059435c24a0")
+                .transactionID("127e2712-cafe-4204-8449-2059435c24a0")
+                .build();
+    }
+
+    public static Transaction buildTransactionEntity() {
+        return Transaction.builder()
+                .amount(40.50)
+                .accountNumber(UUID.fromString("567e2712-cafe-4204-8449-2059435c24a0"))
+                .build();
+    }
+
+    public static Transaction buildTransactionEntity2() {
+        return Transaction.builder()
+                .amount(40.50)
+                .build();
+    }
+
+    public static Transaction buildTransactionEntity3() {
+        return Transaction.builder()
+                .amount(40.50)
+                .build();
+    }
+
+    public static Transaction buildTransactionEntityWithId() {
+        return Transaction.builder()
+                .amount(40.50)
+                .accountNumber(UUID.fromString("567e2712-cafe-4204-8449-2059435c24a0"))
+                .id(UUID.fromString("127e2712-cafe-4204-8449-2059435c24a0"))
+                .build();
+    }
 }

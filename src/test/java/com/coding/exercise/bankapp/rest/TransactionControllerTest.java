@@ -2,8 +2,8 @@ package com.coding.exercise.bankapp.rest;
 
 import com.coding.exercise.bankapp.BaseTest;
 import com.coding.exercise.bankapp.common.ResourceNotFoundException;
-import com.coding.exercise.bankapp.pojos.AccountDetails;
-import com.coding.exercise.bankapp.service.AccountService;
+import com.coding.exercise.bankapp.pojos.TransactionDetails;
+import com.coding.exercise.bankapp.service.TransactionService;
 import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.junit.Before;
@@ -26,12 +26,12 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
-public class AccountControllerTest {
+public class TransactionControllerTest {
 
 
-    public static final String ACCOUNTS_PATH = "/accounts";
+    public static final String TRANSACTIONS_PATH = "/transactions";
     @MockBean
-    private AccountService accountService;
+    private TransactionService transactionService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -42,61 +42,61 @@ public class AccountControllerTest {
     }
 
     @Test
-    public void createAccountSuccessShouldReturn201() {
-        given().body(BaseTest.buildAccountDetailsPayload())
+    public void createTransactionSuccessShouldReturn201() {
+        given().body(BaseTest.buildTransactionDetailsPayload())
                 .contentType(ContentType.JSON)
-                .post(ACCOUNTS_PATH)
+                .post(TRANSACTIONS_PATH)
                 .then()
                 .assertThat().statusCode(201);
     }
 
     @Test
-    public void createAccountShouldReturn400ForMissingPayload() {
+    public void createTransactionShouldReturn400ForMissingPayload() {
         given().contentType(ContentType.JSON)
-                .post(ACCOUNTS_PATH)
+                .post(TRANSACTIONS_PATH)
                 .then()
                 .assertThat().statusCode(400);
     }
 
     @Test
     public void listAccountsHappyPathTest() {
-        List<AccountDetails> allAccountDetails = new ArrayList<>();
-        allAccountDetails.add(BaseTest.buildAccountDetailsPayload());
-        when(accountService.findAccounts(any())).thenReturn(allAccountDetails);
+        List<TransactionDetails> allTransactionDetails = new ArrayList<>();
+        allTransactionDetails.add(BaseTest.buildTransactionDetailsPayload());
+        when(transactionService.getTransactions(any())).thenReturn(allTransactionDetails);
 
         given().contentType(ContentType.JSON)
-                .get(ACCOUNTS_PATH)
+                .get(TRANSACTIONS_PATH)
                 .then()
                 .assertThat().statusCode(200);
     }
 
     @Test
-    public void getAccountHappyPathTest() {
-        AccountDetails accountDetails = BaseTest.buildAccountDetailsPayload();
-        when(accountService.getAccount("567e2712-cafe-4204-8449-2059435c24a0")).thenReturn(accountDetails);
+    public void getTransactionHappyPathTest() {
+        TransactionDetails accountDetails = BaseTest.buildTransactionDetailsPayload();
+        when(transactionService.getTransaction("567e2712-cafe-4204-8449-2059435c24a0")).thenReturn(accountDetails);
 
         given().contentType(ContentType.JSON)
-                .get(ACCOUNTS_PATH + "/567e2712-cafe-4204-8449-2059435c24a0")
+                .get(TRANSACTIONS_PATH + "/567e2712-cafe-4204-8449-2059435c24a0")
                 .then()
                 .assertThat().statusCode(200);
     }
 
     @Test
-    public void notFoundCustomerTest() {
-        when(accountService.getAccount("98765")).thenThrow(ResourceNotFoundException.class);
+    public void notFoundTransactionTest() {
+        when(transactionService.getTransaction("98765")).thenThrow(ResourceNotFoundException.class);
         given().contentType(ContentType.JSON)
-                .get(ACCOUNTS_PATH + "/98765")
+                .get(TRANSACTIONS_PATH + "/98765")
                 .then()
                 .assertThat().statusCode(404);
     }
 
     @Test
-    public void createAccountShouldReturn400ForInvalidPayload() {
-        AccountDetails accountDetails = BaseTest.buildAccountDetailsPayload();
-        accountDetails.setCustomerNumber(null);
-        given().body(accountDetails)
+    public void createTransactionShouldReturn400ForInvalidPayload() {
+        TransactionDetails transactionDetails = BaseTest.buildTransactionDetailsPayload();
+        transactionDetails.setAmount(null);
+        given().body(transactionDetails)
                 .contentType(ContentType.JSON)
-                .post(ACCOUNTS_PATH)
+                .post(TRANSACTIONS_PATH)
                 .then()
                 .assertThat().statusCode(400);
     }

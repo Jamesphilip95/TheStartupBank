@@ -9,13 +9,10 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class TransactionDetails {
     @NotNull
-    private final Double amount;
+    private Double amount;
     @NotNull
-    private final String accountNumber;
-//    private final String transferAccountNumber;
-//    @ApiModelProperty(readOnly = true)
-//    private final TransferType type;
+    private String accountNumber;
     @ApiModelProperty(readOnly = true)
-    private final String transactionID;
+    private String transactionID;
 
 }

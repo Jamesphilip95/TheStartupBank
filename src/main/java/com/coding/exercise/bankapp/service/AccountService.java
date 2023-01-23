@@ -15,9 +15,6 @@ import java.util.*;
 
 @Service
 public class AccountService {
-
-    @Autowired
-    private BankServiceHelper bankServiceHelper;
     @Autowired
     private AccountRepository accountRepository;
 
@@ -31,7 +28,7 @@ public class AccountService {
         Iterable<Account> accountList = accountRepository.findAll();
         List<AccountDetails> allAccountDetails = new ArrayList<>();
         accountList.forEach(account ->
-                allAccountDetails.add(bankServiceHelper.convertToAccountPojo(account))
+                allAccountDetails.add(BankServiceHelper.convertToAccountPojo(account))
         );
         return allAccountDetails;
     }
@@ -40,7 +37,7 @@ public class AccountService {
         Optional<List<Account>> accountListEntityOpt = accountRepository.findByCustomerNumber(customerNumber);
         List<AccountDetails> allAccountDetails = new ArrayList<>();
         accountListEntityOpt.ifPresent(accounts -> accounts.forEach(account ->
-                allAccountDetails.add(bankServiceHelper.convertToAccountPojo(account))
+                allAccountDetails.add(BankServiceHelper.convertToAccountPojo(account))
         ));
         return allAccountDetails;
     }
@@ -49,7 +46,7 @@ public class AccountService {
         if(!customerEntityOpt.isPresent()) {
             throw new BadRequestException("No customer with customerNumber: " + accountDetails.getCustomerNumber());
         }
-        Account account = bankServiceHelper.convertAccountToEntity(accountDetails);
+        Account account = BankServiceHelper.convertAccountToEntity(accountDetails);
         account.setAccountCreatedTime(new Date());
         account.setAccountNumber(UUID.randomUUID());
         account.setCustomerNumber(account.getCustomerNumber());
@@ -62,7 +59,7 @@ public class AccountService {
         if(!accountEntityOpt.isPresent()){
             throw new ResourceNotFoundException("No account with accountNumber: " + accountNumber);
         }
-        return bankServiceHelper.convertToAccountPojo(accountEntityOpt.get());
+        return BankServiceHelper.convertToAccountPojo(accountEntityOpt.get());
     }
 
 }

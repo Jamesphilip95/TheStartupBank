@@ -12,7 +12,7 @@ public class TheStartupBankApplication {
 		SpringApplication.run(TheStartupBankApplication.class, args);
 	}
 
-	public static synchronized Long createID()
+	public static synchronized Long createCustomerNumber()
 	{
 		return customerNumber++;
 	}

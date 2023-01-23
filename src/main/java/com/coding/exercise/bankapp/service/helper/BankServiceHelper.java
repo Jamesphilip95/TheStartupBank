@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Component
 public class BankServiceHelper { //toDo change to static methods
-    public Customer convertCustomerToEntity(CustomerDetails customerDetails) {
+    public static Customer convertCustomerToEntity(CustomerDetails customerDetails) {
         return Customer.builder()
                 .firstName(customerDetails.getFirstName())
                 .lastName(customerDetails.getLastName())
@@ -19,7 +19,7 @@ public class BankServiceHelper { //toDo change to static methods
                 .build();
     }
 
-    private Address convertAddressToEntity(AddressDetails addressDetails) {
+    private static Address convertAddressToEntity(AddressDetails addressDetails) {
         return Address.builder()
                 .addressLine1(addressDetails.getAddressLine1())
                 .addressLine2(addressDetails.getAddressLine2())
@@ -30,14 +30,14 @@ public class BankServiceHelper { //toDo change to static methods
                 .build();
     }
 
-    private Contact convertContactToEntity(ContactDetails contactDetails) {
+    private static Contact convertContactToEntity(ContactDetails contactDetails) {
         return Contact.builder()
                 .email(contactDetails.getEmail())
                 .mobile(contactDetails.getMobile())
                 .build();
     }
 
-    public CustomerDetails convertToCustomerPojo(Customer customer) {
+    public static CustomerDetails convertToCustomerPojo(Customer customer) {
         return CustomerDetails.builder()
                 .firstName(customer.getFirstName())
                 .lastName(customer.getLastName())
@@ -48,14 +48,14 @@ public class BankServiceHelper { //toDo change to static methods
                 .build();
     }
 
-    private ContactDetails convertContactToPojo(Contact contactDetails) {
+    private static ContactDetails convertContactToPojo(Contact contactDetails) {
         return ContactDetails.builder()
                 .email(contactDetails.getEmail())
                 .mobile(contactDetails.getMobile())
                 .build();
     }
 
-    private AddressDetails convertAddressToPojo(Address address) {
+    private static AddressDetails convertAddressToPojo(Address address) {
         return AddressDetails.builder()
                 .addressLine1(address.getAddressLine1())
                 .addressLine2(address.getAddressLine2())
@@ -66,7 +66,7 @@ public class BankServiceHelper { //toDo change to static methods
                 .build();
     }
 
-    public AccountDetails convertToAccountPojo(Account account) {
+    public static AccountDetails convertToAccountPojo(Account account) {
         return AccountDetails.builder()
                 .accountNumber(account.getAccountNumber())
                 .customerNumber(account.getCustomerNumber())
@@ -75,7 +75,7 @@ public class BankServiceHelper { //toDo change to static methods
                 .build();
     }
 
-    private BankInformationDetails convertToBankInfoPojo(BankInformation bankInformation) {
+    private static BankInformationDetails convertToBankInfoPojo(BankInformation bankInformation) {
         return BankInformationDetails.builder()
                 .branchName(bankInformation.getBranchName())
                 .branchAddress(convertAddressToPojo(bankInformation.getBranchAddress()))
@@ -83,14 +83,14 @@ public class BankServiceHelper { //toDo change to static methods
                 .build();
     }
 
-    public Account convertAccountToEntity(AccountDetails accountDetails) {
+    public static Account convertAccountToEntity(AccountDetails accountDetails) {
         return Account.builder()
                 .bankInformation(convertBankInfoToEntity(accountDetails.getBankInformationDetails()))
                 .customerNumber(accountDetails.getCustomerNumber())
                 .build();
     }
 
-    private BankInformation convertBankInfoToEntity(BankInformationDetails bankInformationDetails) {
+    private static BankInformation convertBankInfoToEntity(BankInformationDetails bankInformationDetails) {
         return BankInformation.builder()
                 .branchName(bankInformationDetails.getBranchName())
                 .branchAddress(convertAddressToEntity(bankInformationDetails.getBranchAddress()))
@@ -109,7 +109,7 @@ public class BankServiceHelper { //toDo change to static methods
 //        return transactions;
 //    }
 
-    public Transaction convertToTransactionEntity(TransactionDetails transactionDetails) {
+    public static Transaction convertToTransactionEntity(TransactionDetails transactionDetails) {
         return Transaction.builder()
         .amount(transactionDetails.getAmount())
         .accountNumber(UUID.fromString(transactionDetails.getAccountNumber()))
@@ -141,7 +141,7 @@ public class BankServiceHelper { //toDo change to static methods
 //        return TransferType.TRANSFER;
 //    }
 
-    public TransactionDetails convertToTransactionPojo(Transaction transaction) {
+    public static TransactionDetails convertToTransactionPojo(Transaction transaction) {
         return TransactionDetails.builder()
                 .accountNumber(transaction.getAccountNumber().toString())
                 .amount(transaction.getAmount())

@@ -16,8 +16,6 @@ import java.util.*;
 @Service
 public class TransactionService {
     @Autowired
-    private BankServiceHelper bankServiceHelper;
-    @Autowired
     private AccountRepository accountRepository;
     @Autowired
     private TransactionRepository transactionRepository;
@@ -27,7 +25,7 @@ public class TransactionService {
         if(!accountEntityOpt.isPresent()) {
             throw new BadRequestException("No account with accountNumber: " + transactionDetails.getAccountNumber()); //toDo change to exception
         }
-        Transaction transaction = bankServiceHelper.convertToTransactionEntity(transactionDetails);
+        Transaction transaction = BankServiceHelper.convertToTransactionEntity(transactionDetails);
         transactionRepository.save(transaction);
         return transaction.getId();
     }
@@ -39,7 +37,7 @@ public class TransactionService {
         List<TransactionDetails> allTransactionDetails = new ArrayList<>();
         Iterable<Transaction> transactionList = transactionRepository.findAll();
         transactionList.forEach(transaction ->
-                allTransactionDetails.add(bankServiceHelper.convertToTransactionPojo(transaction))
+                allTransactionDetails.add(BankServiceHelper.convertToTransactionPojo(transaction))
         );
         return allTransactionDetails;
     }
@@ -49,7 +47,7 @@ public class TransactionService {
         if(!transactionEntityOpt.isPresent()) {
             throw new ResourceNotFoundException("No transaction with transaction id " + transactionId);
         }
-        return bankServiceHelper.convertToTransactionPojo(transactionEntityOpt.get());
+        return BankServiceHelper.convertToTransactionPojo(transactionEntityOpt.get());
     }
 
     public List<TransactionDetails> getTransactionsByAccountNumber(String accountNumber) {
@@ -59,7 +57,7 @@ public class TransactionService {
             throw new BadRequestException("No transaction with account number " + accountNumber);
         }
         transactionEntityOpt.get().forEach(transaction ->
-                allTransactionDetails.add(bankServiceHelper.convertToTransactionPojo(transaction))
+                allTransactionDetails.add(BankServiceHelper.convertToTransactionPojo(transaction))
         );
         return allTransactionDetails;
     }
