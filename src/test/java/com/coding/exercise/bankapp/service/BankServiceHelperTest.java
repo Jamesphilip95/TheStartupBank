@@ -21,13 +21,7 @@ public class BankServiceHelperTest {
         assertEquals("Bloggs",customer.getLastName());
         assertEquals(Long.valueOf(12345),customer.getCustomerNumber());
 
-        assertEquals("House",customer.getAddressDetails().getAddressLine1());
-        assertEquals("Street",customer.getAddressDetails().getAddressLine2());
-        assertEquals("City",customer.getAddressDetails().getCity());
-        assertEquals("UK",customer.getAddressDetails().getCountry());
-        assertEquals("12345",customer.getAddressDetails().getPostcode());
-
-        assertEquals("joe.bloggs.com",customer.getContactDetails().getEmail());
-        assertEquals("0123456789",customer.getContactDetails().getMobile());
+        assertEquals("joe.bloggs.com", customer.getEmail());
+        assertEquals("0123456789", customer.getMobile());
     }
 }

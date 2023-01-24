@@ -12,6 +12,10 @@ public class TransactionDetails {
     private Double amount;
     @NotNull
     private String accountNumber;
+    @NotNull
+    private TransactionType transactionType;
+    @NotNull
+    private String description;
     @ApiModelProperty(readOnly = true)
     private String transactionID;
 

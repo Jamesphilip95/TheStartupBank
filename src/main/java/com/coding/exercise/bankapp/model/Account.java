@@ -19,8 +19,6 @@ public class Account {
     @Column(name="ACCOUNT_ID")
     private UUID accountNumber;
     private Long customerNumber;
-    @OneToOne(cascade=CascadeType.ALL)
-    private BankInformation bankInformation;
     private Date accountCreatedTime;
 
 

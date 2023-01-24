@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.coding.exercise.bankapp.TheStartupBankApplication.createCustomerNumber;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -69,16 +68,8 @@ public class CustomerServiceTest {
         assertEquals(customerDetails.getLastName(),actualCustomerDetails.getLastName());
         assertEquals(customerDetails.getFirstName(),actualCustomerDetails.getFirstName());
         assertEquals(customerDetails.getCreateDateTime(),actualCustomerDetails.getCreateDateTime());
-        assertEquals(customerDetails.getAddressDetails().getAddressLine1(),actualCustomerDetails.getAddressDetails().getAddressLine1());
-        assertEquals(customerDetails.getAddressDetails().getAddressLine2(),actualCustomerDetails.getAddressDetails().getAddressLine2());
-        assertEquals(customerDetails.getAddressDetails().getPostcode(),actualCustomerDetails.getAddressDetails().getPostcode());
-        assertEquals(customerDetails.getAddressDetails().getPostcode(),actualCustomerDetails.getAddressDetails().getPostcode());
-        assertEquals(customerDetails.getAddressDetails().getCity(),actualCustomerDetails.getAddressDetails().getCity());
-        assertEquals(customerDetails.getAddressDetails().getCountry(),actualCustomerDetails.getAddressDetails().getCountry());
-        assertEquals(customerDetails.getAddressDetails().getCounty(),actualCustomerDetails.getAddressDetails().getCounty());
-        assertEquals(customerDetails.getContactDetails().getEmail(),actualCustomerDetails.getContactDetails().getEmail());
-        assertEquals(customerDetails.getContactDetails().getMobile(),actualCustomerDetails.getContactDetails().getMobile());
-
+        assertEquals(customerDetails.getEmail(), actualCustomerDetails.getEmail());
+        assertEquals(customerDetails.getMobileNumber(), actualCustomerDetails.getMobileNumber());
     }
 
     @Test
@@ -97,6 +88,7 @@ public class CustomerServiceTest {
         assertNotNull(actualAllCustomerDetails);
         assertEquals(allCustomerDetails.size(), actualAllCustomerDetails.size());
         assertEquals(allCustomerDetails.get(0).getCustomerNumber(), actualAllCustomerDetails.get(0).getCustomerNumber());
+        assertEquals(allCustomerDetails.get(1).getCustomerNumber(), actualAllCustomerDetails.get(1).getCustomerNumber());
     }
 
     @Test
@@ -118,7 +110,7 @@ public class CustomerServiceTest {
     public void testCustomerNumberIncrement() {
         CustomerDetails customerDetails = BaseTest.buildCustomerDetailsPayload();
 
-        Long currentCustomerNumber = createCustomerNumber();
+        Long currentCustomerNumber = BankServiceHelper.createCustomerNumber();
 
         Long actualCustomerNumber = customerService.registerCustomer(customerDetails);
         assertEquals(++currentCustomerNumber,actualCustomerNumber);

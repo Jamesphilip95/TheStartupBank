@@ -17,12 +17,10 @@ public class Customer {
     private String firstName;
 
     private String lastName;
-    @OneToOne(cascade=CascadeType.ALL)
-    private Address addressDetails;
 
-    @OneToOne(cascade=CascadeType.ALL)
-    private Contact contactDetails;
+    private String mobile;
 
+    private String email;
     @Temporal(TemporalType.TIME)
     private Date createDateTime;
 

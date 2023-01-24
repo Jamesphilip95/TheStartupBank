@@ -8,61 +8,35 @@ import java.util.UUID;
 
 @Component
 public class BankServiceHelper { //toDo change to static methods
+
+    private static long customerNumber = 1;
+
+    public static synchronized Long createCustomerNumber()
+    {
+        return customerNumber++;
+    }
+
+
     public static Customer convertCustomerToEntity(CustomerDetails customerDetails) {
         return Customer.builder()
                 .firstName(customerDetails.getFirstName())
                 .lastName(customerDetails.getLastName())
                 .customerNumber(customerDetails.getCustomerNumber())
                 .createDateTime(customerDetails.getCreateDateTime())
-                .contactDetails(convertContactToEntity(customerDetails.getContactDetails()))
-                .addressDetails(convertAddressToEntity(customerDetails.getAddressDetails()))
+                .email(customerDetails.getEmail())
+                .mobile(customerDetails.getMobileNumber())
                 .build();
     }
 
-    private static Address convertAddressToEntity(AddressDetails addressDetails) {
-        return Address.builder()
-                .addressLine1(addressDetails.getAddressLine1())
-                .addressLine2(addressDetails.getAddressLine2())
-                .city(addressDetails.getCity())
-                .county(addressDetails.getCounty())
-                .country(addressDetails.getCountry())
-                .postcode(addressDetails.getPostcode())
-                .build();
-    }
-
-    private static Contact convertContactToEntity(ContactDetails contactDetails) {
-        return Contact.builder()
-                .email(contactDetails.getEmail())
-                .mobile(contactDetails.getMobile())
-                .build();
-    }
 
     public static CustomerDetails convertToCustomerPojo(Customer customer) {
         return CustomerDetails.builder()
                 .firstName(customer.getFirstName())
                 .lastName(customer.getLastName())
                 .createDateTime(customer.getCreateDateTime())
-                .addressDetails(convertAddressToPojo(customer.getAddressDetails()))
-                .contactDetails(convertContactToPojo(customer.getContactDetails()))
                 .customerNumber(customer.getCustomerNumber())
-                .build();
-    }
-
-    private static ContactDetails convertContactToPojo(Contact contactDetails) {
-        return ContactDetails.builder()
-                .email(contactDetails.getEmail())
-                .mobile(contactDetails.getMobile())
-                .build();
-    }
-
-    private static AddressDetails convertAddressToPojo(Address address) {
-        return AddressDetails.builder()
-                .addressLine1(address.getAddressLine1())
-                .addressLine2(address.getAddressLine2())
-                .city(address.getCity())
-                .county(address.getCounty())
-                .postcode(address.getPostcode())
-                .country(address.getCountry())
+                .email(customer.getEmail())
+                .mobileNumber(customer.getMobile())
                 .build();
     }
 
@@ -71,49 +45,22 @@ public class BankServiceHelper { //toDo change to static methods
                 .accountNumber(account.getAccountNumber())
                 .customerNumber(account.getCustomerNumber())
                 .accountCreatedTime(account.getAccountCreatedTime())
-                .bankInformationDetails(convertToBankInfoPojo(account.getBankInformation()))
                 .build();
     }
-
-    private static BankInformationDetails convertToBankInfoPojo(BankInformation bankInformation) {
-        return BankInformationDetails.builder()
-                .branchName(bankInformation.getBranchName())
-                .branchAddress(convertAddressToPojo(bankInformation.getBranchAddress()))
-                .branchCode(bankInformation.getBranchCode())
-                .build();
-    }
-
     public static Account convertAccountToEntity(AccountDetails accountDetails) {
         return Account.builder()
-                .bankInformation(convertBankInfoToEntity(accountDetails.getBankInformationDetails()))
                 .customerNumber(accountDetails.getCustomerNumber())
+                .accountNumber(accountDetails.getAccountNumber())
+                .accountCreatedTime(accountDetails.getAccountCreatedTime())
                 .build();
     }
-
-    private static BankInformation convertBankInfoToEntity(BankInformationDetails bankInformationDetails) {
-        return BankInformation.builder()
-                .branchName(bankInformationDetails.getBranchName())
-                .branchAddress(convertAddressToEntity(bankInformationDetails.getBranchAddress()))
-                .branchCode(bankInformationDetails.getBranchCode())
-                .build();
-    }
-
-//    public List<Transaction> convertToTransactionEntities(TransactionDetails transactionDetails) {
-//        List<Transaction> transactions = new ArrayList<>();
-//        Transaction primaryTransaction = getPrimaryTransaction(transactionDetails);
-//        transactions.add(primaryTransaction);
-//        if(primaryTransaction.getType()==TransferType.TRANSFER) {
-//            Transaction secondaryTransaction = getSecondaryTransaction(transactionDetails);
-//            transactions.add(secondaryTransaction);
-//        }
-//        return transactions;
-//    }
-
     public static Transaction convertToTransactionEntity(TransactionDetails transactionDetails) {
         return Transaction.builder()
-        .amount(transactionDetails.getAmount())
-        .accountNumber(UUID.fromString(transactionDetails.getAccountNumber()))
-        .build();
+                .amount(transactionDetails.getAmount())
+                .accountNumber(UUID.fromString(transactionDetails.getAccountNumber()))
+                .description(transactionDetails.getDescription())
+                .transactionType(transactionDetails.getTransactionType())
+                .build();
     }
 
 //    private Transaction getSecondaryTransaction(TransactionDetails transactionDetails) {
@@ -146,6 +93,8 @@ public class BankServiceHelper { //toDo change to static methods
                 .accountNumber(transaction.getAccountNumber().toString())
                 .amount(transaction.getAmount())
                 .transactionID(transaction.getId().toString())
+                .transactionType(transaction.getTransactionType())
+                .description(transaction.getDescription())
                 .build();
     }
 }

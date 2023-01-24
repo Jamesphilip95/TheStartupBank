@@ -1,5 +1,6 @@
 package com.coding.exercise.bankapp.model;
 
+import com.coding.exercise.bankapp.pojos.TransactionType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,4 +25,6 @@ public class Transaction {
     private UUID id;
     private Double amount;
     private UUID accountNumber;
+    private String description;
+    private TransactionType transactionType;
 }

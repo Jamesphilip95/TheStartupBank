@@ -86,9 +86,6 @@ public class AccountServiceTest {
         assertEquals(accountDetails.getCustomerNumber(), actualAccountDetails.getCustomerNumber());
         assertEquals(accountDetails.getAccountNumber(), actualAccountDetails.getAccountNumber());
         assertEquals(accountDetails.getAccountCreatedTime(), actualAccountDetails.getAccountCreatedTime());
-        assertEquals(accountDetails.getBankInformationDetails().getBranchName(), actualAccountDetails.getBankInformationDetails().getBranchName());
-
-
     }
 
     @Test

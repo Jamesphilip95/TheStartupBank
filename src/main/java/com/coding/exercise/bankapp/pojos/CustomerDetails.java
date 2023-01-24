@@ -16,10 +16,13 @@ public class CustomerDetails {
     private String firstName;
     @NotNull
     private String lastName;
+
     @NotNull
-    private ContactDetails contactDetails;
+    private String mobileNumber;
+
     @NotNull
-    private AddressDetails addressDetails;
+    private String email;
+
     @ApiModelProperty(readOnly = true)
     private Long customerNumber;
 

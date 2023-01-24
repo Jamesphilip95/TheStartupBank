@@ -85,7 +85,8 @@ public class TransactionServiceTest {
 
         assertEquals(transactionDetails.getAccountNumber(),actualTransactionDetails.getAccountNumber());
         assertEquals(transactionDetails.getTransactionID(),actualTransactionDetails.getTransactionID());
-        assertEquals(transactionDetails.getAmount(), actualTransactionDetails.getAmount());
+        assertEquals(transactionDetails.getTransactionType(), actualTransactionDetails.getTransactionType());
+        assertEquals(transactionDetails.getDescription(), actualTransactionDetails.getDescription());
     }
 
     @Test

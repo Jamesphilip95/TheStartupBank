@@ -14,9 +14,6 @@ public class AccountDetails {
 
     @ApiModelProperty(readOnly = true)
     private final UUID accountNumber;
-
-    @NotNull
-    private BankInformationDetails bankInformationDetails;
     @NotNull
     private Long customerNumber;
 

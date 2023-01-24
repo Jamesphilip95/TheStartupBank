@@ -13,7 +13,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static com.coding.exercise.bankapp.TheStartupBankApplication.createCustomerNumber;
 
 @Service
 public class CustomerService {
@@ -33,7 +32,7 @@ public class CustomerService {
 
     public Long registerCustomer(CustomerDetails customerDetails) {
         Customer customer = BankServiceHelper.convertCustomerToEntity(customerDetails);
-        customer.setCustomerNumber(createCustomerNumber());
+        customer.setCustomerNumber(BankServiceHelper.createCustomerNumber());
         customer.setCreateDateTime(new Date());
         customerRepository.save(customer);
         return customer.getCustomerNumber();

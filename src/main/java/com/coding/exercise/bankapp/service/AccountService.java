@@ -49,7 +49,6 @@ public class AccountService {
         Account account = BankServiceHelper.convertAccountToEntity(accountDetails);
         account.setAccountCreatedTime(new Date());
         account.setAccountNumber(UUID.randomUUID());
-        account.setCustomerNumber(account.getCustomerNumber());
         accountRepository.save(account);
         return account.getAccountNumber();
     }
