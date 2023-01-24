@@ -1,0 +1,16 @@
+{
+  "addressDetails": {
+    "addressLine1": "New Barn Farms",
+    "addressLine2": "Streetvile",
+    "city": "London",
+    "country": "England",
+    "county": "Oxfordshire",
+    "postcode": "XFS 1234"
+  },
+  "contactDetails": {
+    "email": "ashj.hs@gmail.com",
+    "mobile": "0182783234"
+  },
+  "firstName": "Tomus",
+  "lastName": "Philips1"
+}
