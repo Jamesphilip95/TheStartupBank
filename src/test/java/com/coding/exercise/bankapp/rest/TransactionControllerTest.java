@@ -16,12 +16,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.*;
+
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -43,31 +41,30 @@ public class TransactionControllerTest {
 
     @Test
     public void createTransactionSuccessShouldReturn201() {
-        given().body(BaseTest.buildTransactionDetailsPayload())
+        given()
+                .body(BaseTest.buildTransactionDetailsPayload())
                 .contentType(ContentType.JSON)
                 .post(TRANSACTIONS_PATH)
                 .then()
-                .assertThat().statusCode(201);
+                    .statusCode(CREATED.value());
     }
 
     @Test
     public void createTransactionShouldReturn400ForMissingPayload() {
-        given().contentType(ContentType.JSON)
+        given()
+                .contentType(ContentType.JSON)
                 .post(TRANSACTIONS_PATH)
                 .then()
-                .assertThat().statusCode(400);
+                    .statusCode(BAD_REQUEST.value());
     }
 
     @Test
-    public void listAccountsHappyPathTest() {
-        List<TransactionDetails> allTransactionDetails = new ArrayList<>();
-        allTransactionDetails.add(BaseTest.buildTransactionDetailsPayload());
-        when(transactionService.getTransactions(any())).thenReturn(allTransactionDetails);
-
-        given().contentType(ContentType.JSON)
+    public void listTransactionsHappyPathTest() {
+        given()
+                .contentType(ContentType.JSON)
                 .get(TRANSACTIONS_PATH)
                 .then()
-                .assertThat().statusCode(200);
+                    .statusCode(OK.value());
     }
 
     @Test
@@ -75,30 +72,33 @@ public class TransactionControllerTest {
         TransactionDetails accountDetails = BaseTest.buildTransactionDetailsPayload();
         when(transactionService.getTransaction("567e2712-cafe-4204-8449-2059435c24a0")).thenReturn(accountDetails);
 
-        given().contentType(ContentType.JSON)
+        given()
+                .contentType(ContentType.JSON)
                 .get(TRANSACTIONS_PATH + "/567e2712-cafe-4204-8449-2059435c24a0")
                 .then()
-                .assertThat().statusCode(200);
+                    .statusCode(OK.value());
     }
 
     @Test
     public void notFoundTransactionTest() {
         when(transactionService.getTransaction("98765")).thenThrow(ResourceNotFoundException.class);
-        given().contentType(ContentType.JSON)
+        given()
+                .contentType(ContentType.JSON)
                 .get(TRANSACTIONS_PATH + "/98765")
                 .then()
-                .assertThat().statusCode(404);
+                    .statusCode(NOT_FOUND.value());
     }
 
     @Test
     public void createTransactionShouldReturn400ForInvalidPayload() {
         TransactionDetails transactionDetails = BaseTest.buildTransactionDetailsPayload();
         transactionDetails.setAmount(null);
-        given().body(transactionDetails)
+        given()
+                .body(transactionDetails)
                 .contentType(ContentType.JSON)
                 .post(TRANSACTIONS_PATH)
                 .then()
-                .assertThat().statusCode(400);
+                    .statusCode(BAD_REQUEST.value());
     }
 
 }

@@ -4,17 +4,19 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Builder
 public class TransactionDetails {
     @NotNull
-    private Double amount;
+    private BigDecimal amount;
     @NotNull
     private String accountNumber;
     @NotNull
     private TransactionType transactionType;
-    @NotNull
+    @ApiModelProperty(readOnly = true)
     private String description;
     @ApiModelProperty(readOnly = true)
     private String transactionID;

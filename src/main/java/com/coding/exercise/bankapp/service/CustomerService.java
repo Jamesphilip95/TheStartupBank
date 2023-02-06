@@ -1,6 +1,5 @@
 package com.coding.exercise.bankapp.service;
 
-import com.coding.exercise.bankapp.common.ResourceNotFoundException;
 import com.coding.exercise.bankapp.model.Customer;
 import com.coding.exercise.bankapp.pojos.CustomerDetails;
 import com.coding.exercise.bankapp.respository.CustomerRepository;
@@ -12,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import static com.coding.exercise.bankapp.common.ExceptionHandler.validateCustomerFound;
 
 
 @Service
@@ -40,9 +41,7 @@ public class CustomerService {
 
     public CustomerDetails getCustomer(Long customerNumber) {
         Optional<Customer> customerEntityOpt = customerRepository.findByCustomerNumber(customerNumber);
-        if(!customerEntityOpt.isPresent()){
-            throw new ResourceNotFoundException("No customer with customerNumber: " + customerNumber);
-        }
+        validateCustomerFound(customerNumber, customerEntityOpt.isPresent());
         return BankServiceHelper.convertToCustomerPojo(customerEntityOpt.get());
     }
 }

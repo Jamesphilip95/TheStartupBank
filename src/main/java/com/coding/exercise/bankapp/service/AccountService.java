@@ -1,7 +1,5 @@
 package com.coding.exercise.bankapp.service;
 
-import com.coding.exercise.bankapp.common.BadRequestException;
-import com.coding.exercise.bankapp.common.ResourceNotFoundException;
 import com.coding.exercise.bankapp.model.Account;
 import com.coding.exercise.bankapp.model.Customer;
 import com.coding.exercise.bankapp.pojos.AccountDetails;
@@ -12,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+
+import static com.coding.exercise.bankapp.common.ExceptionHandler.validateAccountResourceFound;
+import static com.coding.exercise.bankapp.common.ExceptionHandler.validateCustomer;
 
 @Service
 public class AccountService {
@@ -43,9 +44,7 @@ public class AccountService {
     }
     public UUID createAccount(AccountDetails accountDetails) {
         Optional<Customer> customerEntityOpt = customerRepository.findByCustomerNumber(accountDetails.getCustomerNumber());
-        if(!customerEntityOpt.isPresent()) {
-            throw new BadRequestException("No customer with customerNumber: " + accountDetails.getCustomerNumber());
-        }
+        validateCustomer(accountDetails.getCustomerNumber(), customerEntityOpt.isPresent());
         Account account = BankServiceHelper.convertAccountToEntity(accountDetails);
         account.setAccountCreatedTime(new Date());
         account.setAccountNumber(UUID.randomUUID());
@@ -55,9 +54,7 @@ public class AccountService {
 
     public AccountDetails getAccount(String accountNumber) {
         Optional<Account> accountEntityOpt = accountRepository.findByAccountNumber(UUID.fromString(accountNumber));
-        if(!accountEntityOpt.isPresent()){
-            throw new ResourceNotFoundException("No account with accountNumber: " + accountNumber);
-        }
+        validateAccountResourceFound(accountNumber, accountEntityOpt.isPresent());
         return BankServiceHelper.convertToAccountPojo(accountEntityOpt.get());
     }
 

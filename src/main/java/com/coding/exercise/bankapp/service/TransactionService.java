@@ -1,7 +1,6 @@
 package com.coding.exercise.bankapp.service;
 
-import com.coding.exercise.bankapp.common.BadRequestException;
-import com.coding.exercise.bankapp.common.ResourceNotFoundException;
+import com.coding.exercise.bankapp.common.ExceptionHandler;
 import com.coding.exercise.bankapp.model.Account;
 import com.coding.exercise.bankapp.model.Transaction;
 import com.coding.exercise.bankapp.pojos.TransactionDetails;
@@ -13,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static com.coding.exercise.bankapp.common.ExceptionHandler.validateTransactionFound;
+
 @Service
 public class TransactionService {
     @Autowired
@@ -22,19 +23,17 @@ public class TransactionService {
 
     public UUID createTransaction(TransactionDetails transactionDetails) {
         Optional<Account> accountEntityOpt = accountRepository.findByAccountNumber(UUID.fromString(transactionDetails.getAccountNumber()));
-        if(!accountEntityOpt.isPresent()) {
-            throw new BadRequestException("No account with accountNumber: " + transactionDetails.getAccountNumber()); //toDo change to exception
-        }
+        ExceptionHandler.validateSourceAccount(transactionDetails.getAccountNumber(), accountEntityOpt.isPresent());
         Transaction transaction = BankServiceHelper.convertToTransactionEntity(transactionDetails);
         transactionRepository.save(transaction);
         return transaction.getId();
     }
 
     public List<TransactionDetails> getTransactions(String accountNumber) {
+        List<TransactionDetails> allTransactionDetails = new ArrayList<>();
         if(accountNumber!=null) {
             return getTransactionsByAccountNumber(accountNumber);
         }
-        List<TransactionDetails> allTransactionDetails = new ArrayList<>();
         Iterable<Transaction> transactionList = transactionRepository.findAll();
         transactionList.forEach(transaction ->
                 allTransactionDetails.add(BankServiceHelper.convertToTransactionPojo(transaction))
@@ -44,21 +43,16 @@ public class TransactionService {
 
     public TransactionDetails getTransaction(String transactionId) {
         Optional<Transaction> transactionEntityOpt = transactionRepository.findById(UUID.fromString(transactionId));
-        if(!transactionEntityOpt.isPresent()) {
-            throw new ResourceNotFoundException("No transaction with transaction id " + transactionId);
-        }
+        validateTransactionFound(transactionId, transactionEntityOpt.isPresent());
         return BankServiceHelper.convertToTransactionPojo(transactionEntityOpt.get());
     }
 
     public List<TransactionDetails> getTransactionsByAccountNumber(String accountNumber) {
         List<TransactionDetails> allTransactionDetails = new ArrayList<>();
         Optional<List<Transaction>> transactionEntityOpt = transactionRepository.findByAccountNumber(UUID.fromString(accountNumber));
-        if(!transactionEntityOpt.isPresent()) {
-            throw new BadRequestException("No transaction with account number " + accountNumber);
-        }
-        transactionEntityOpt.get().forEach(transaction ->
+        transactionEntityOpt.ifPresent(transactions -> transactions.forEach(transaction ->
                 allTransactionDetails.add(BankServiceHelper.convertToTransactionPojo(transaction))
-        );
+        ));
         return allTransactionDetails;
     }
 

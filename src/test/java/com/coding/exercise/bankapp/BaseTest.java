@@ -3,6 +3,7 @@ package com.coding.exercise.bankapp;
 import com.coding.exercise.bankapp.model.*;
 import com.coding.exercise.bankapp.pojos.*;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
@@ -59,7 +60,7 @@ public class BaseTest {
 
     public static TransactionDetails buildTransactionDetailsPayload() {
         return TransactionDetails.builder()
-                .amount(40.50)
+                .amount(BigDecimal.valueOf(40.50))
                 .accountNumber("567e2712-cafe-4204-8449-2059435c24a0")
                 .transactionID("127e2712-cafe-4204-8449-2059435c24a0")
                 .transactionType(TransactionType.CASH)
@@ -69,7 +70,7 @@ public class BaseTest {
 
     public static Transaction buildTransactionEntity() {
         return Transaction.builder()
-                .amount(40.50)
+                .amount(BigDecimal.valueOf(40.50))
                 .accountNumber(UUID.fromString("567e2712-cafe-4204-8449-2059435c24a0"))
                 .transactionType(TransactionType.CASH)
                 .description("Cricket")
@@ -78,7 +79,7 @@ public class BaseTest {
 
     public static Transaction buildTransactionEntity2() {
         return Transaction.builder()
-                .amount(40.50)
+                .amount(BigDecimal.valueOf(40.50))
                 .transactionType(TransactionType.CASH)
                 .description("Cricket")
                 .build();
@@ -86,7 +87,7 @@ public class BaseTest {
 
     public static Transaction buildTransactionEntity3() {
         return Transaction.builder()
-                .amount(40.50)
+                .amount(BigDecimal.valueOf(40.50))
                 .transactionType(TransactionType.CASH)
                 .description("Cricket")
                 .build();
@@ -94,10 +95,27 @@ public class BaseTest {
 
     public static Transaction buildTransactionEntityWithId() {
         return Transaction.builder()
-                .amount(40.50)
+                .amount(BigDecimal.valueOf(40.50))
                 .accountNumber(UUID.fromString("567e2712-cafe-4204-8449-2059435c24a0"))
                 .id(UUID.fromString("127e2712-cafe-4204-8449-2059435c24a0"))
                 .description("Cricket")
+                .build();
+    }
+
+    public static TransferDetails buildTransferDetailsPayload() {
+        return TransferDetails.builder()
+                .amount(BigDecimal.valueOf(40.50))
+                .sourceAccount("567e2712-cafe-4204-8449-2059435c24a0")
+                .targetAccount("127e2712-cafe-4204-8449-2059435c24a0")
+                .description("Cricket")
+                .build();
+    }
+
+    public static Transfer buildTransferEntity() {
+        return Transfer.builder()
+                .sourceTransactionID(UUID.fromString("677e2712-cafe-4204-8449-2059435c24a0"))
+                .targetTransactionID(UUID.fromString("197e2712-cafe-4204-8449-2059435c24a0"))
+                .id(UUID.fromString("147e2712-cafe-4204-8449-2059435c24a0"))
                 .build();
     }
 }

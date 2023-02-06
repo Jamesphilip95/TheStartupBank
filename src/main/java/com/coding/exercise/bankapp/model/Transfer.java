@@ -1,6 +1,5 @@
 package com.coding.exercise.bankapp.model;
 
-import com.coding.exercise.bankapp.pojos.TransactionType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +9,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Builder
@@ -18,14 +16,12 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class Transaction {
+public class Transfer {
 
     @Id
     @GeneratedValue
-    @Column(name="TRANSACTION_ID")
+    @Column(name="TRANSFER_ID")
     private UUID id;
-    private BigDecimal amount;
-    private UUID accountNumber;
-    private String description;
-    private TransactionType transactionType;
+    private UUID sourceTransactionID;
+    private UUID targetTransactionID;
 }

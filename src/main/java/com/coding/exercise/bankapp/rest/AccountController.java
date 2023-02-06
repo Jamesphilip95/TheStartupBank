@@ -8,11 +8,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,7 +37,8 @@ public class AccountController implements AccountControllerDoc {
 
     @Override
     @PostMapping( consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> createAccount(@RequestBody @Valid AccountDetails accountDetails) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(accountService.createAccount(accountDetails));
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public UUID createAccount(@RequestBody @Valid AccountDetails accountDetails) {
+        return accountService.createAccount(accountDetails);
     }
 }

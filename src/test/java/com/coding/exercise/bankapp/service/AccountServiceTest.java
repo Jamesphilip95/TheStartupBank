@@ -3,7 +3,6 @@ package com.coding.exercise.bankapp.service;
 
 import com.coding.exercise.bankapp.BaseTest;
 import com.coding.exercise.bankapp.common.BadRequestException;
-import com.coding.exercise.bankapp.common.ResourceNotFoundException;
 import com.coding.exercise.bankapp.model.Account;
 import com.coding.exercise.bankapp.model.Customer;
 import com.coding.exercise.bankapp.pojos.AccountDetails;
@@ -64,14 +63,14 @@ public class AccountServiceTest {
         assertEquals(account, actualAccount);
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testCreateAccountNotFound() {
         Optional<Customer> customerEntityOpt = Optional.empty();
         when(customerRepository.findByCustomerNumber(12345L)).thenReturn(customerEntityOpt);
-        accountService.createAccount(BaseTest.buildAccountDetailsPayload());
         exceptionRule.expect(BadRequestException.class);
-        String expectedMessage = "No customer with customerNumber: 12345";
+        String expectedMessage = "No customer with customer number 12345";
         exceptionRule.expectMessage(expectedMessage);
+        accountService.createAccount(BaseTest.buildAccountDetailsPayload());
     }
 
     @Test
@@ -125,14 +124,13 @@ public class AccountServiceTest {
         assertNotNull(accountDetails);
         assertTrue(accountDetails.isEmpty());
     }
-    @Test(expected = ResourceNotFoundException.class)
+    @Test
     public void testGetAccountNotFound() {
         Optional<Account> accountEntityOpt = Optional.empty();
         when(accountRepository.findByAccountNumber(UUID.fromString("567e2712-cafe-4204-8449-2059435c24a0"))).thenReturn(accountEntityOpt);
-        accountService.getAccount("567e2712-cafe-4204-8449-2059435c24a0");
-
-        String expectedMessage = "No account with accountNumber: 567e2712-cafe-4204-8449-2059435c24a0";
+        String expectedMessage = "No account with account number 567e2712-cafe-4204-8449-2059435c24a0";
         exceptionRule.expectMessage(expectedMessage);
+        accountService.getAccount("567e2712-cafe-4204-8449-2059435c24a0");
     }
 
 }

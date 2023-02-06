@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 @Component
-public class BankServiceHelper { //toDo change to static methods
+public class BankServiceHelper {
 
     private static long customerNumber = 1;
 
@@ -63,31 +63,6 @@ public class BankServiceHelper { //toDo change to static methods
                 .build();
     }
 
-//    private Transaction getSecondaryTransaction(TransactionDetails transactionDetails) {
-//        return Transaction.builder()
-//                .amount(transactionDetails.getAmount() * -1)
-//                .accountNumber(UUID.fromString(transactionDetails.getTransferAccountNumber()))
-//                .transferAccountNumber(UUID.fromString(transactionDetails.getAccountNumber()))
-//                .type(TransferType.TRANSFER)
-//                .build();
-//    }
-
-//    private Transaction getPrimaryTransaction(TransactionDetails transactionDetails) {
-//        return Transaction.builder()
-//                .amount(transactionDetails.getAmount())
-//                .accountNumber(UUID.fromString(transactionDetails.getAccountNumber()))
-//                .transferAccountNumber(transactionDetails.getTransferAccountNumber() != null ? UUID.fromString(transactionDetails.getTransferAccountNumber()) : null)
-//                .type(getTransferType(transactionDetails.getTransferAccountNumber(), transactionDetails.getAmount()))
-//                .build();
-//    }
-
-//    private TransferType getTransferType(String accountNumber, Double amount) {
-//        if(accountNumber==null){
-//            return amount >= 0 ? TransferType.DEPOSIT : TransferType.WITHDRAW;
-//        }
-//        return TransferType.TRANSFER;
-//    }
-
     public static TransactionDetails convertToTransactionPojo(Transaction transaction) {
         return TransactionDetails.builder()
                 .accountNumber(transaction.getAccountNumber().toString())
@@ -95,6 +70,39 @@ public class BankServiceHelper { //toDo change to static methods
                 .transactionID(transaction.getId().toString())
                 .transactionType(transaction.getTransactionType())
                 .description(transaction.getDescription())
+                .build();
+    }
+
+    public static Transfer convertToTransferEntity(UUID sourceTransactionId, UUID targetTransactionId) {
+        return Transfer.builder()
+                .sourceTransactionID(sourceTransactionId)
+                .targetTransactionID(targetTransactionId)
+                .build();
+    }
+
+    public static TransactionDetails buildTargetTransaction(TransferDetails transferDetails) {
+        return TransactionDetails.builder()
+                .amount(transferDetails.getAmount())
+                .description(transferDetails.getDescription())
+                .accountNumber(transferDetails.getTargetAccount())
+                .transactionType(TransactionType.TRANSFER)
+                .build();
+    }
+
+    public static TransactionDetails buildSourceTransaction(TransferDetails transferDetails) {
+        return TransactionDetails.builder()
+                .amount(transferDetails.getAmount().negate())
+                .description(transferDetails.getDescription())
+                .accountNumber(transferDetails.getSourceAccount())
+                .transactionType(TransactionType.TRANSFER)
+                .build();
+    }
+
+    public static TransferDetails convertToTransferPojo(Transfer transfer) {
+        return TransferDetails.builder()
+                .sourceTransactionID(transfer.getSourceTransactionID())
+                .targetTransactionID(transfer.getTargetTransactionID())
+                .transferId(transfer.getId())
                 .build();
     }
 }

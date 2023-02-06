@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface TransactionRepository extends CrudRepository<Transaction, String> {
+public interface TransactionRepository extends CrudRepository<Transaction, UUID> {
     Optional<List<Transaction>> findByAccountNumber(UUID accountNumber);
-    Optional<Transaction> findById(UUID id);
 }

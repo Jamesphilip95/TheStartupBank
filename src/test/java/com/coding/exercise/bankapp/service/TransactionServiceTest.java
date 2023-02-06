@@ -3,7 +3,6 @@ package com.coding.exercise.bankapp.service;
 
 import com.coding.exercise.bankapp.BaseTest;
 import com.coding.exercise.bankapp.common.BadRequestException;
-import com.coding.exercise.bankapp.common.ResourceNotFoundException;
 import com.coding.exercise.bankapp.model.Account;
 import com.coding.exercise.bankapp.model.Transaction;
 import com.coding.exercise.bankapp.pojos.TransactionDetails;
@@ -64,14 +63,14 @@ public class TransactionServiceTest {
         assertEquals(transaction, actualTransaction);
     }
 
-    @Test(expected = BadRequestException.class)
-    public void testCreateTransactionNotFound() {
+    @Test
+    public void testCreateTransactionAccountNotFound() {
         Optional<Account> accountEntityOpt = Optional.empty();
         when(accountRepository.findByAccountNumber(UUID.fromString("567e2712-cafe-4204-8449-2059435c24a0"))).thenReturn(accountEntityOpt);
-        transactionService.createTransaction(BaseTest.buildTransactionDetailsPayload());
         exceptionRule.expect(BadRequestException.class);
-        String expectedMessage = "No customer with customerNumber: 12345";
+        String expectedMessage = "No source account with account number 567e2712-cafe-4204-8449-2059435c24a0";
         exceptionRule.expectMessage(expectedMessage);
+        transactionService.createTransaction(BaseTest.buildTransactionDetailsPayload());
     }
 
     @Test
@@ -90,7 +89,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void testFindAllCustomers() {
+    public void testFindAllTransactions() {
         List<Transaction> accountList = new ArrayList<>();
         accountList.add(BaseTest.buildTransactionEntityWithId());
         accountList.add(BaseTest.buildTransactionEntityWithId());
@@ -127,14 +126,13 @@ public class TransactionServiceTest {
         assertNotNull(transactionDetails);
         assertTrue(transactionDetails.isEmpty());
     }
-    @Test(expected = ResourceNotFoundException.class)
+    @Test
     public void testGetTransactionNotFound() {
         Optional<Account> accountEntityOpt = Optional.empty();
         when(accountRepository.findByAccountNumber(UUID.fromString("567e2712-cafe-4204-8449-2059435c24a0"))).thenReturn(accountEntityOpt);
-        transactionService.getTransaction("567e2712-cafe-4204-8449-2059435c24a0");
-
-        String expectedMessage = "No account with accountNumber: 567e2712-cafe-4204-8449-2059435c24a0";
+        String expectedMessage = "No transaction with transaction number 567e2712-cafe-4204-8449-2059435c24a0";
         exceptionRule.expectMessage(expectedMessage);
+        transactionService.getTransaction("567e2712-cafe-4204-8449-2059435c24a0");
     }
 
 }

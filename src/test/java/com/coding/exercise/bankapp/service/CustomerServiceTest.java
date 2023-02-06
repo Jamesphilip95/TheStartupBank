@@ -1,7 +1,6 @@
 package com.coding.exercise.bankapp.service;
 
 
-import com.coding.exercise.bankapp.common.ResourceNotFoundException;
 import com.coding.exercise.bankapp.model.Customer;
 import com.coding.exercise.bankapp.pojos.CustomerDetails;
 import com.coding.exercise.bankapp.respository.CustomerRepository;
@@ -98,12 +97,12 @@ public class CustomerServiceTest {
         assertNotNull(allCustomers);
         assertTrue(allCustomers.isEmpty());
     }
-    @Test(expected = ResourceNotFoundException.class)
+    @Test
     public void testGetCustomerNotFound() {
         when(customerRepository.findByCustomerNumber(54321L)).thenReturn(Optional.empty());
-        customerService.getCustomer(54321L);
-        String expectedMessage = "No customer with customerNumber: 54321";
+        String expectedMessage = "No customer with customer number 54321";
         exceptionRule.expectMessage(expectedMessage);
+        customerService.getCustomer(54321L);
     }
 
     @Test
